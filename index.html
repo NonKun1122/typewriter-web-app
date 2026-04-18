@@ -4,273 +4,386 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Typewriter Web</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: black;
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-        }
-        .typewriter-text {
-            white-space: pre-wrap;
-            word-break: break-all;
-            position: relative;
-        }
-        .typewriter-text::after {
-            content: '';
-            display: inline-block;
-            width: 2px;
-            height: 1em;
-            background-color: white;
-            margin-left: 2px;
-            animation: blink 0.7s step-end infinite;
-        }
-        @keyframes blink {
-            50% { background-color: transparent; }
-        }
-        .color-picker-wrapper {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
             display: flex;
             align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Input Page */
+        .input-page {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .input-page.hidden {
+            display: none;
+        }
+
+        .input-page h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #aaa;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
             gap: 10px;
         }
+
+        .form-group label {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .color-input {
-            width: 50px;
-            height: 40px;
-            border: 2px solid #555;
+            width: 60px;
+            height: 45px;
+            border: 2px solid #444;
             border-radius: 4px;
             cursor: pointer;
+            background: #000;
         }
+
         .color-preview {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             border-radius: 4px;
-            border: 1px solid #666;
+            border: 2px solid #555;
         }
-        .waiting-container {
-            display: flex;
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #111;
+            border: 2px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-run {
+            background-color: #fff;
+            color: #000;
+            width: 100%;
+        }
+
+        .btn-run:hover {
+            background-color: #ddd;
+        }
+
+        .btn-back {
+            background-color: #444;
+            color: #fff;
+            width: 100%;
+        }
+
+        .btn-back:hover {
+            background-color: #555;
+        }
+
+        /* Waiting Page */
+        .waiting-page {
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
+            min-height: 100vh;
+            text-align: center;
         }
-        .countdown {
-            font-size: 72px;
-            font-weight: bold;
-            color: #888;
+
+        .waiting-page.active {
+            display: flex;
         }
+
         .waiting-text {
             font-size: 18px;
             color: #666;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .pulse {
             animation: pulse 1s ease-in-out infinite;
         }
-        .instruction-text {
-            font-size: 12px;
+
+        .countdown {
+            font-size: 80px;
+            font-weight: bold;
             color: #555;
-            margin-top: 10px;
-            line-height: 1.6;
+            line-height: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Output Page */
+        .output-page {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 100%;
+            width: 100%;
+            min-height: 100vh;
+            justify-content: space-between;
+        }
+
+        .output-page.active {
+            display: flex;
+        }
+
+        .output-text {
+            font-size: 18px;
+            line-height: 1.8;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: #fff;
+            margin-left: 2px;
+            animation: blink 0.7s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { background-color: transparent; }
+        }
+
+        .cursor.hidden {
+            display: none;
         }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center p-4">
+<body>
+    <!-- Input Page -->
+    <div class="input-page" id="inputPage">
+        <h1>Typewriter</h1>
 
-    <!-- Input Section -->
-    <div id="input-container" class="w-full max-w-lg text-center">
-        <h1 class="text-2xl mb-6 text-gray-400">กรอกข้อความที่ต้องการแสดง</h1>
-        
-        <!-- Color Picker -->
-        <div class="mb-4">
-            <label class="block text-gray-400 mb-2">เลือกสีข้อความเริ่มต้น:</label>
-            <div class="color-picker-wrapper justify-center">
-                <input type="color" id="color-picker" class="color-input" value="#FFFFFF">
-                <div id="color-preview" class="color-preview" style="background-color: #FFFFFF;"></div>
+        <div class="form-group">
+            <label>เลือกสีเริ่มต้น:</label>
+            <div class="color-picker-container">
+                <input type="color" id="colorPicker" class="color-input" value="#FFFFFF">
+                <div id="colorPreview" class="color-preview" style="background-color: #FFFFFF;"></div>
             </div>
         </div>
 
-        <!-- Text Input -->
-        <textarea id="user-input" rows="5" class="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white mb-2" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
-        
-        <!-- Instruction -->
-        <div class="instruction-text">
-            💡 ใช้ [#HEX]ข้อความ[/#] เพื่อเปลี่ยนสีเฉพาะคำ<br>
-            เช่น: สวัสดี [#FF0000]โลก[/#] ทั่วไป
+        <div class="form-group">
+            <label>ข้อความ:</label>
+            <textarea id="textInput" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
+            <div class="hint">💡 ใช้ [#FF0000]ข้อความ[/#] เพื่อเปลี่ยนสี (เช่น สีแดง)</div>
         </div>
-        
-        <!-- Run Button -->
-        <button id="run-btn" class="mt-4 px-8 py-2 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors">
-            Run
-        </button>
+
+        <button class="btn-run" id="runBtn">Run</button>
     </div>
 
-    <!-- Waiting Section (Hidden by default) -->
-    <div id="waiting-container" class="hidden w-full h-full flex items-center justify-center">
-        <div class="waiting-container">
-            <div class="waiting-text pulse">กำลังเตรียมการ...</div>
-            <div class="countdown" id="countdown">10</div>
-        </div>
+    <!-- Waiting Page -->
+    <div class="waiting-page" id="waitingPage">
+        <div class="waiting-text">กำลังเตรียมการ...</div>
+        <div class="countdown" id="countdown">10</div>
     </div>
 
-    <!-- Output Section (Hidden by default) -->
-    <div id="output-container" class="hidden w-full h-full flex flex-col items-start justify-between p-6 overflow-auto">
-        <div class="flex-1 w-full flex items-start">
-            <div id="output-text" class="text-lg leading-relaxed"></div>
-        </div>
-        <!-- Back Button -->
-        <button id="back-btn" class="w-full mt-6 px-6 py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors">
-            ← ย้อนกลับ
-        </button>
+    <!-- Output Page -->
+    <div class="output-page" id="outputPage">
+        <div class="output-text" id="outputText"></div>
+        <button class="btn-back" id="backBtn">← ย้อนกลับ</button>
     </div>
 
     <script>
-        const inputContainer = document.getElementById('input-container');
-        const outputContainer = document.getElementById('output-container');
-        const waitingContainer = document.getElementById('waiting-container');
-        const userInput = document.getElementById('user-input');
-        const colorPicker = document.getElementById('color-picker');
-        const colorPreview = document.getElementById('color-preview');
-        const runBtn = document.getElementById('run-btn');
-        const backBtn = document.getElementById('back-btn');
-        const outputText = document.getElementById('output-text');
+        // DOM Elements
+        const inputPage = document.getElementById('inputPage');
+        const waitingPage = document.getElementById('waitingPage');
+        const outputPage = document.getElementById('outputPage');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorPreview = document.getElementById('colorPreview');
+        const textInput = document.getElementById('textInput');
+        const runBtn = document.getElementById('runBtn');
+        const backBtn = document.getElementById('backBtn');
+        const outputText = document.getElementById('outputText');
         const countdownDisplay = document.getElementById('countdown');
+
+        // State
         let countdownTimer = null;
         let typewriterTimer = null;
 
-        // Update color preview when color picker changes
+        // Update color preview
         colorPicker.addEventListener('change', (e) => {
             colorPreview.style.backgroundColor = e.target.value;
         });
 
-        // Parse text with color tags and return array of {text, color} objects
-        function parseColoredText(text, defaultColor) {
-            const result = [];
+        // Parse colored text
+        function parseText(text, defaultColor) {
+            const segments = [];
             const regex = /\[#([A-Fa-f0-9]{6})\](.*?)\[\/#\]/g;
             let lastIndex = 0;
             let match;
 
             while ((match = regex.exec(text)) !== null) {
-                // Add text before the color tag
+                // Add text before tag
                 if (match.index > lastIndex) {
-                    const beforeText = text.substring(lastIndex, match.index);
-                    if (beforeText.length > 0) {
-                        result.push({
-                            text: beforeText,
-                            color: defaultColor
-                        });
-                    }
-                }
-                // Add colored text
-                if (match[2].length > 0) {
-                    result.push({
-                        text: match[2],
-                        color: '#' + match[1]
+                    segments.push({
+                        text: text.substring(lastIndex, match.index),
+                        color: defaultColor
                     });
                 }
+                // Add colored text
+                segments.push({
+                    text: match[2],
+                    color: '#' + match[1]
+                });
                 lastIndex = regex.lastIndex;
             }
 
             // Add remaining text
             if (lastIndex < text.length) {
-                const remainingText = text.substring(lastIndex);
-                if (remainingText.length > 0) {
-                    result.push({
-                        text: remainingText,
-                        color: defaultColor
-                    });
-                }
+                segments.push({
+                    text: text.substring(lastIndex),
+                    color: defaultColor
+                });
             }
 
-            return result.length > 0 ? result : [{text: text, color: defaultColor}];
+            return segments.length > 0 ? segments : [{ text, color: defaultColor }];
         }
 
-        // Run button - switch to waiting view and start countdown
-        runBtn.addEventListener('click', () => {
-            const text = userInput.value;
-            const defaultColor = colorPicker.value;
-            
-            if (!text.trim()) return;
+        // Show waiting page
+        function showWaiting() {
+            inputPage.classList.add('hidden');
+            waitingPage.classList.add('active');
+        }
 
-            // Switch to waiting view
-            inputContainer.classList.add('hidden');
-            waitingContainer.classList.remove('hidden');
-            
-            // Start countdown
-            let countdown = 10;
-            countdownDisplay.textContent = countdown;
-            
+        // Show output page
+        function showOutput() {
+            waitingPage.classList.remove('active');
+            outputPage.classList.add('active');
+        }
+
+        // Show input page
+        function showInput() {
+            outputPage.classList.remove('active');
+            inputPage.classList.remove('hidden');
+        }
+
+        // Countdown
+        function startCountdown(callback) {
+            let count = 10;
+            countdownDisplay.textContent = count;
+
             countdownTimer = setInterval(() => {
-                countdown--;
-                countdownDisplay.textContent = countdown;
-                
-                if (countdown === 0) {
+                count--;
+                countdownDisplay.textContent = count;
+
+                if (count === 0) {
                     clearInterval(countdownTimer);
-                    
-                    // Switch to output view
-                    waitingContainer.classList.add('hidden');
-                    outputContainer.classList.remove('hidden');
-                    
-                    // Clear output
-                    outputText.innerHTML = '';
-                    
-                    // Parse colored text
-                    const parsedText = parseColoredText(text, defaultColor);
-                    
-                    // Start typewriter effect with colors
-                    typeWriterWithColors(parsedText, 0, 0);
+                    callback();
                 }
             }, 1000);
-        });
+        }
 
-        // Typewriter effect with color support
-        function typeWriterWithColors(parsedText, segmentIndex, charIndex) {
-            if (segmentIndex >= parsedText.length) {
+        // Typewriter effect
+        function typewrite(segments, index = 0, charIndex = 0) {
+            if (index >= segments.length) {
+                // Add cursor at end
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+                outputText.appendChild(cursor);
                 return;
             }
 
-            const segment = parsedText[segmentIndex];
-            
-            // Create or get span for this segment
-            let span = outputText.querySelector(`[data-segment="${segmentIndex}"]`);
+            const segment = segments[index];
+            let span = outputText.querySelector(`[data-index="${index}"]`);
+
             if (!span) {
                 span = document.createElement('span');
+                span.setAttribute('data-index', index);
                 span.style.color = segment.color;
-                span.setAttribute('data-segment', segmentIndex);
                 outputText.appendChild(span);
             }
 
             if (charIndex < segment.text.length) {
-                span.textContent += segment.text.charAt(charIndex);
+                span.textContent += segment.text[charIndex];
                 typewriterTimer = setTimeout(() => {
-                    typeWriterWithColors(parsedText, segmentIndex, charIndex + 1);
+                    typewrite(segments, index, charIndex + 1);
                 }, 50);
             } else {
-                // Move to next segment
-                typeWriterWithColors(parsedText, segmentIndex + 1, 0);
+                typewrite(segments, index + 1, 0);
             }
         }
 
-        // Back button - return to input view
-        backBtn.addEventListener('click', () => {
-            outputContainer.classList.add('hidden');
-            inputContainer.classList.remove('hidden');
-            outputText.innerHTML = '';
-            
-            // Clear any active timers
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-            }
-            if (typewriterTimer) {
-                clearTimeout(typewriterTimer);
-            }
+        // Run button
+        runBtn.addEventListener('click', () => {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            const defaultColor = colorPicker.value;
+            const segments = parseText(text, defaultColor);
+
+            showWaiting();
+            startCountdown(() => {
+                outputText.innerHTML = '';
+                showOutput();
+                typewrite(segments);
+            });
         });
 
-        // Allow Ctrl+Enter key to trigger Run button
-        userInput.addEventListener('keypress', (e) => {
+        // Back button
+        backBtn.addEventListener('click', () => {
+            clearInterval(countdownTimer);
+            clearTimeout(typewriterTimer);
+            outputText.innerHTML = '';
+            showInput();
+        });
+
+        // Keyboard shortcut
+        textInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) {
                 runBtn.click();
             }
