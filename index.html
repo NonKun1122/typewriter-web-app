@@ -13,15 +13,21 @@
             overflow: hidden;
         }
         .typewriter-text {
-            border-right: 2px solid white;
             white-space: pre-wrap;
             word-break: break-all;
+            position: relative;
+        }
+        .typewriter-text::after {
+            content: '';
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: white;
+            margin-left: 2px;
+            animation: blink 0.7s step-end infinite;
         }
         @keyframes blink {
-            50% { border-color: transparent; }
-        }
-        .cursor-blink {
-            animation: blink 0.7s step-end infinite;
+            50% { background-color: transparent; }
         }
         .color-picker-wrapper {
             display: flex;
@@ -92,7 +98,7 @@
         
         <!-- Instruction -->
         <div class="instruction-text">
-            💡 ใช้ [#HEX_COLOR]ข้อความ[/#] เพื่อเปลี่ยนสีเฉพาะคำ<br>
+            💡 ใช้ [#HEX]ข้อความ[/#] เพื่อเปลี่ยนสีเฉพาะคำ<br>
             เช่น: สวัสดี [#FF0000]โลก[/#] ทั่วไป
         </div>
         
@@ -111,12 +117,12 @@
     </div>
 
     <!-- Output Section (Hidden by default) -->
-    <div id="output-container" class="hidden w-full max-w-4xl h-full flex flex-col items-start justify-start p-10 overflow-auto">
-        <div class="flex-1 w-full">
-            <div id="output-text" class="text-3xl leading-relaxed"></div>
+    <div id="output-container" class="hidden w-full h-full flex flex-col items-start justify-between p-6 overflow-auto">
+        <div class="flex-1 w-full flex items-start">
+            <div id="output-text" class="text-lg leading-relaxed"></div>
         </div>
         <!-- Back Button -->
-        <button id="back-btn" class="mt-8 px-6 py-2 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors">
+        <button id="back-btn" class="w-full mt-6 px-6 py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors">
             ← ย้อนกลับ
         </button>
     </div>
@@ -150,25 +156,33 @@
             while ((match = regex.exec(text)) !== null) {
                 // Add text before the color tag
                 if (match.index > lastIndex) {
-                    result.push({
-                        text: text.substring(lastIndex, match.index),
-                        color: defaultColor
-                    });
+                    const beforeText = text.substring(lastIndex, match.index);
+                    if (beforeText.length > 0) {
+                        result.push({
+                            text: beforeText,
+                            color: defaultColor
+                        });
+                    }
                 }
                 // Add colored text
-                result.push({
-                    text: match[2],
-                    color: '#' + match[1]
-                });
+                if (match[2].length > 0) {
+                    result.push({
+                        text: match[2],
+                        color: '#' + match[1]
+                    });
+                }
                 lastIndex = regex.lastIndex;
             }
 
             // Add remaining text
             if (lastIndex < text.length) {
-                result.push({
-                    text: text.substring(lastIndex),
-                    color: defaultColor
-                });
+                const remainingText = text.substring(lastIndex);
+                if (remainingText.length > 0) {
+                    result.push({
+                        text: remainingText,
+                        color: defaultColor
+                    });
+                }
             }
 
             return result.length > 0 ? result : [{text: text, color: defaultColor}];
@@ -215,12 +229,6 @@
         // Typewriter effect with color support
         function typeWriterWithColors(parsedText, segmentIndex, charIndex) {
             if (segmentIndex >= parsedText.length) {
-                // Add cursor at the end
-                const cursor = document.createElement('span');
-                cursor.style.borderRight = '2px solid white';
-                cursor.style.animation = 'blink 0.7s step-end infinite';
-                cursor.style.paddingRight = '2px';
-                outputText.appendChild(cursor);
                 return;
             }
 
