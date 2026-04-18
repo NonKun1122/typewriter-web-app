@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typewriter Web</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+        .typewriter-text {
+            border-right: 2px solid white;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        .cursor-blink {
+            animation: blink 0.7s step-end infinite;
+        }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center p-4">
+
+    <!-- Input Section -->
+    <div id="input-container" class="w-full max-w-lg text-center">
+        <h1 class="text-2xl mb-6 text-gray-400">กรอกข้อความที่ต้องการแสดง</h1>
+        <textarea id="user-input" rows="4" class="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white mb-4" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
+        <button id="run-btn" class="px-8 py-2 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors">
+            Run
+        </button>
+    </div>
+
+    <!-- Output Section (Hidden by default) -->
+    <div id="output-container" class="hidden w-full max-w-4xl h-full flex items-start justify-start p-10 overflow-auto">
+        <p id="output-text" class="text-3xl typewriter-text cursor-blink leading-relaxed"></p>
+    </div>
+
+    <script>
+        const inputContainer = document.getElementById('input-container');
+        const outputContainer = document.getElementById('output-container');
+        const userInput = document.getElementById('user-input');
+        const runBtn = document.getElementById('run-btn');
+        const outputText = document.getElementById('output-text');
+
+        runBtn.addEventListener('click', () => {
+            const text = userInput.value;
+            if (!text.trim()) return;
+
+            // Switch views
+            inputContainer.classList.add('hidden');
+            outputContainer.classList.remove('hidden');
+            
+            // Start typewriter effect
+            typeWriter(text, 0);
+        });
+
+        function typeWriter(text, i) {
+            if (i < text.length) {
+                outputText.textContent += text.charAt(i);
+                setTimeout(() => typeWriter(text, i + 1), 50); // Speed: 50ms per character
+            } else {
+                // Remove the blinking cursor effect when finished if desired
+                // outputText.classList.remove('cursor-blink');
+                // outputText.style.borderRight = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
