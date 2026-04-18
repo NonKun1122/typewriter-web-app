@@ -41,6 +41,29 @@
             border-radius: 4px;
             border: 1px solid #666;
         }
+        .waiting-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .countdown {
+            font-size: 72px;
+            font-weight: bold;
+            color: #888;
+        }
+        .waiting-text {
+            font-size: 18px;
+            color: #666;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="h-screen flex items-center justify-center p-4">
@@ -67,6 +90,14 @@
         </button>
     </div>
 
+    <!-- Waiting Section (Hidden by default) -->
+    <div id="waiting-container" class="hidden w-full h-full flex items-center justify-center">
+        <div class="waiting-container">
+            <div class="waiting-text pulse">กำลังเตรียมการ...</div>
+            <div class="countdown" id="countdown">5</div>
+        </div>
+    </div>
+
     <!-- Output Section (Hidden by default) -->
     <div id="output-container" class="hidden w-full max-w-4xl h-full flex flex-col items-start justify-start p-10 overflow-auto">
         <div class="flex-1 w-full">
@@ -81,35 +112,55 @@
     <script>
         const inputContainer = document.getElementById('input-container');
         const outputContainer = document.getElementById('output-container');
+        const waitingContainer = document.getElementById('waiting-container');
         const userInput = document.getElementById('user-input');
         const colorPicker = document.getElementById('color-picker');
         const colorPreview = document.getElementById('color-preview');
         const runBtn = document.getElementById('run-btn');
         const backBtn = document.getElementById('back-btn');
         const outputText = document.getElementById('output-text');
+        const countdownDisplay = document.getElementById('countdown');
+        let countdownTimer = null;
 
         // Update color preview when color picker changes
         colorPicker.addEventListener('change', (e) => {
             colorPreview.style.backgroundColor = e.target.value;
         });
 
-        // Run button - switch to output view and start typewriter
+        // Run button - switch to waiting view and start countdown
         runBtn.addEventListener('click', () => {
             const text = userInput.value;
             const color = colorPicker.value;
             
             if (!text.trim()) return;
 
-            // Switch views
+            // Switch to waiting view
             inputContainer.classList.add('hidden');
-            outputContainer.classList.remove('hidden');
+            waitingContainer.classList.remove('hidden');
             
-            // Set text color
-            outputText.style.color = color;
-            outputText.textContent = '';
+            // Start countdown
+            let countdown = 5;
+            countdownDisplay.textContent = countdown;
             
-            // Start typewriter effect
-            typeWriter(text, 0);
+            countdownTimer = setInterval(() => {
+                countdown--;
+                countdownDisplay.textContent = countdown;
+                
+                if (countdown === 0) {
+                    clearInterval(countdownTimer);
+                    
+                    // Switch to output view
+                    waitingContainer.classList.add('hidden');
+                    outputContainer.classList.remove('hidden');
+                    
+                    // Set text color
+                    outputText.style.color = color;
+                    outputText.textContent = '';
+                    
+                    // Start typewriter effect
+                    typeWriter(text, 0);
+                }
+            }, 1000);
         });
 
         // Back button - return to input view
@@ -117,6 +168,11 @@
             outputContainer.classList.add('hidden');
             inputContainer.classList.remove('hidden');
             outputText.textContent = '';
+            
+            // Clear any active countdown
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+            }
         });
 
         // Typewriter effect function
