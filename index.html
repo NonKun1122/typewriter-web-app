@@ -22,6 +22,60 @@
             padding: 20px;
         }
 
+        /* Mode Selection Page */
+        .mode-page {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .mode-page.hidden {
+            display: none;
+        }
+
+        .mode-page h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            padding: 20px;
+            background-color: #111;
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .mode-btn:hover {
+            border-color: #666;
+            background-color: #1a1a1a;
+        }
+
+        .mode-btn-title {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .mode-btn-desc {
+            font-size: 12px;
+            color: #888;
+        }
+
         /* Input Page */
         .input-page {
             display: flex;
@@ -92,6 +146,40 @@
             border-color: #666;
         }
 
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background-color: #111;
+            border: 2px solid #333;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: #666;
+            background-color: #1a1a1a;
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
         .hint {
             font-size: 12px;
             color: #555;
@@ -118,6 +206,12 @@
             background-color: #ddd;
         }
 
+        .btn-run:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         .btn-back {
             background-color: #444;
             color: #fff;
@@ -126,6 +220,16 @@
 
         .btn-back:hover {
             background-color: #555;
+        }
+
+        .btn-mode-back {
+            background-color: #333;
+            color: #fff;
+            width: 100%;
+        }
+
+        .btn-mode-back:hover {
+            background-color: #444;
         }
 
         /* Waiting Page */
@@ -202,12 +306,37 @@
         .cursor.hidden {
             display: none;
         }
+
+        .processing {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            animation: pulse 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
-    <!-- Input Page -->
-    <div class="input-page" id="inputPage">
-        <h1>Typewriter</h1>
+    <!-- Mode Selection Page -->
+    <div class="mode-page" id="modePage">
+        <h1>เลือกโหมด</h1>
+        <div class="mode-buttons">
+            <button class="mode-btn" id="textModeBtn">
+                <div class="mode-btn-title">📝 โหมดข้อความ</div>
+                <div class="mode-btn-desc">พิมพ์ข้อความด้วยเอฟเฟกต์ Typewriter</div>
+            </button>
+            <button class="mode-btn" id="lyricsModeBtn">
+                <div class="mode-btn-title">🎵 โหมดเนื้อเพลง</div>
+                <div class="mode-btn-desc">อัปโหลดไฟล์เสียงเพื่อเจนเนื้อเพลง</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Text Mode Input Page -->
+    <div class="input-page" id="textInputPage">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>📝 โหมดข้อความ</h1>
+            <button class="btn-mode-back" id="backToModeBtn1">← ย้อนกลับ</button>
+        </div>
 
         <div class="form-group">
             <label>เลือกสีเริ่มต้น:</label>
@@ -223,13 +352,48 @@
             <div class="hint">💡 ใช้ [#FF0000]ข้อความ[/#] เพื่อเปลี่ยนสี (เช่น สีแดง)</div>
         </div>
 
-        <button class="btn-run" id="runBtn">Run</button>
+        <button class="btn-run" id="runTextBtn">Run</button>
+    </div>
+
+    <!-- Lyrics Mode Input Page -->
+    <div class="input-page" id="lyricsInputPage">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>🎵 โหมดเนื้อเพลง</h1>
+            <button class="btn-mode-back" id="backToModeBtn2">← ย้อนกลับ</button>
+        </div>
+
+        <div class="form-group">
+            <label>อัปโหลดไฟล์เสียง:</label>
+            <div class="file-input-wrapper">
+                <input type="file" id="audioFile" accept="audio/*" />
+                <label for="audioFile" class="file-input-label">
+                    📁 คลิกเพื่อเลือกไฟล์เสียง (.mp3, .wav, .m4a)
+                </label>
+                <div class="file-name" id="fileName"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>เลือกสีเริ่มต้น:</label>
+            <div class="color-picker-container">
+                <input type="color" id="lyricsColorPicker" class="color-input" value="#FFFFFF">
+                <div id="lyricsColorPreview" class="color-preview" style="background-color: #FFFFFF;"></div>
+            </div>
+        </div>
+
+        <button class="btn-run" id="runLyricsBtn" disabled>🔄 เจนเนื้อเพลง</button>
+        <div class="hint">⏳ กรุณาอัปโหลดไฟล์เสียงก่อนกดปุ่ม</div>
     </div>
 
     <!-- Waiting Page -->
     <div class="waiting-page" id="waitingPage">
         <div class="waiting-text">กำลังเตรียมการ...</div>
         <div class="countdown" id="countdown">10</div>
+    </div>
+
+    <!-- Processing Page -->
+    <div class="waiting-page" id="processingPage">
+        <div class="processing">🎵 กำลังเจนเนื้อเพลง...<br>นี่อาจใช้เวลาสักครู่</div>
     </div>
 
     <!-- Output Page -->
@@ -240,13 +404,29 @@
 
     <script>
         // DOM Elements
-        const inputPage = document.getElementById('inputPage');
+        const modePage = document.getElementById('modePage');
+        const textInputPage = document.getElementById('textInputPage');
+        const lyricsInputPage = document.getElementById('lyricsInputPage');
         const waitingPage = document.getElementById('waitingPage');
+        const processingPage = document.getElementById('processingPage');
         const outputPage = document.getElementById('outputPage');
+
+        const textModeBtn = document.getElementById('textModeBtn');
+        const lyricsModeBtn = document.getElementById('lyricsModeBtn');
+        const backToModeBtn1 = document.getElementById('backToModeBtn1');
+        const backToModeBtn2 = document.getElementById('backToModeBtn2');
+
         const colorPicker = document.getElementById('colorPicker');
         const colorPreview = document.getElementById('colorPreview');
         const textInput = document.getElementById('textInput');
-        const runBtn = document.getElementById('runBtn');
+        const runTextBtn = document.getElementById('runTextBtn');
+
+        const audioFile = document.getElementById('audioFile');
+        const fileName = document.getElementById('fileName');
+        const lyricsColorPicker = document.getElementById('lyricsColorPicker');
+        const lyricsColorPreview = document.getElementById('lyricsColorPreview');
+        const runLyricsBtn = document.getElementById('runLyricsBtn');
+
         const backBtn = document.getElementById('backBtn');
         const outputText = document.getElementById('outputText');
         const countdownDisplay = document.getElementById('countdown');
@@ -254,10 +434,49 @@
         // State
         let countdownTimer = null;
         let typewriterTimer = null;
+        let currentMode = null;
 
-        // Update color preview
+        // Mode Selection
+        textModeBtn.addEventListener('click', () => {
+            currentMode = 'text';
+            modePage.classList.add('hidden');
+            textInputPage.classList.remove('hidden');
+        });
+
+        lyricsModeBtn.addEventListener('click', () => {
+            currentMode = 'lyrics';
+            modePage.classList.add('hidden');
+            lyricsInputPage.classList.remove('hidden');
+        });
+
+        backToModeBtn1.addEventListener('click', () => {
+            textInputPage.classList.add('hidden');
+            modePage.classList.remove('hidden');
+        });
+
+        backToModeBtn2.addEventListener('click', () => {
+            lyricsInputPage.classList.add('hidden');
+            modePage.classList.remove('hidden');
+        });
+
+        // Color pickers
         colorPicker.addEventListener('change', (e) => {
             colorPreview.style.backgroundColor = e.target.value;
+        });
+
+        lyricsColorPicker.addEventListener('change', (e) => {
+            lyricsColorPreview.style.backgroundColor = e.target.value;
+        });
+
+        // Audio file upload
+        audioFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = '✓ ' + e.target.files[0].name;
+                runLyricsBtn.disabled = false;
+            } else {
+                fileName.textContent = '';
+                runLyricsBtn.disabled = true;
+            }
         });
 
         // Parse colored text
@@ -268,14 +487,12 @@
             let match;
 
             while ((match = regex.exec(text)) !== null) {
-                // Add text before tag
                 if (match.index > lastIndex) {
                     segments.push({
                         text: text.substring(lastIndex, match.index),
                         color: defaultColor
                     });
                 }
-                // Add colored text
                 segments.push({
                     text: match[2],
                     color: '#' + match[1]
@@ -283,7 +500,6 @@
                 lastIndex = regex.lastIndex;
             }
 
-            // Add remaining text
             if (lastIndex < text.length) {
                 segments.push({
                     text: text.substring(lastIndex),
@@ -296,20 +512,33 @@
 
         // Show waiting page
         function showWaiting() {
-            inputPage.classList.add('hidden');
+            textInputPage.classList.add('hidden');
+            lyricsInputPage.classList.add('hidden');
             waitingPage.classList.add('active');
+        }
+
+        // Show processing page
+        function showProcessing() {
+            textInputPage.classList.add('hidden');
+            lyricsInputPage.classList.add('hidden');
+            processingPage.classList.add('active');
         }
 
         // Show output page
         function showOutput() {
             waitingPage.classList.remove('active');
+            processingPage.classList.remove('active');
             outputPage.classList.add('active');
         }
 
         // Show input page
         function showInput() {
             outputPage.classList.remove('active');
-            inputPage.classList.remove('hidden');
+            if (currentMode === 'text') {
+                textInputPage.classList.remove('hidden');
+            } else if (currentMode === 'lyrics') {
+                lyricsInputPage.classList.remove('hidden');
+            }
         }
 
         // Countdown
@@ -331,7 +560,6 @@
         // Typewriter effect
         function typewrite(segments, index = 0, charIndex = 0) {
             if (index >= segments.length) {
-                // Add cursor at end
                 const cursor = document.createElement('span');
                 cursor.className = 'cursor';
                 outputText.appendChild(cursor);
@@ -358,8 +586,8 @@
             }
         }
 
-        // Run button
-        runBtn.addEventListener('click', () => {
+        // Text Mode
+        runTextBtn.addEventListener('click', () => {
             const text = textInput.value.trim();
             if (!text) return;
 
@@ -374,6 +602,47 @@
             });
         });
 
+        // Lyrics Mode
+        runLyricsBtn.addEventListener('click', async () => {
+            const file = audioFile.files[0];
+            if (!file) return;
+
+            showProcessing();
+
+            try {
+                // Upload file and get transcription
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('https://api.manus.im/transcribe', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': 'Bearer ' + (localStorage.getItem('manus_token') || '')
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to transcribe audio');
+                }
+
+                const data = await response.json();
+                const lyrics = data.text || 'ไม่สามารถเจนเนื้อเพลงได้';
+
+                const defaultColor = lyricsColorPicker.value;
+                const segments = parseText(lyrics, defaultColor);
+
+                outputText.innerHTML = '';
+                showOutput();
+                typewrite(segments);
+
+            } catch (error) {
+                console.error('Error:', error);
+                outputText.innerHTML = '<span style="color: #ff6666;">❌ เกิดข้อผิดพลาด: ' + error.message + '</span>';
+                showOutput();
+            }
+        });
+
         // Back button
         backBtn.addEventListener('click', () => {
             clearInterval(countdownTimer);
@@ -385,7 +654,7 @@
         // Keyboard shortcut
         textInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) {
-                runBtn.click();
+                runTextBtn.click();
             }
         });
     </script>
