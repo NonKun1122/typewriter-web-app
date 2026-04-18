@@ -1,662 +1,500 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Typewriter Web</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typewriter Web</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #000; color: #fff;
+  font-family: 'Courier New', monospace;
+  min-height: 100vh; display: flex;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.page { display: none; flex-direction: column; gap: 18px; max-width: 500px; width: 100%; }
+.page.active { display: flex; }
+.full-page { display: none; flex-direction: column; gap: 20px; width: 100%; min-height: 100vh; justify-content: space-between; }
+.full-page.active { display: flex; }
+.wait-center { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 24px; min-height: 100vh; text-align: center; }
+.wait-center.active { display: flex; }
 
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+.page-header { display: flex; justify-content: space-between; align-items: center; }
+.page-header h1 { font-size: 20px; color: #aaa; }
+h1.center { font-size: 24px; text-align: center; color: #aaa; }
 
-        /* Mode Selection Page */
-        .mode-page {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 500px;
-            width: 100%;
-        }
+button { cursor: pointer; border: none; border-radius: 6px; transition: all .25s; font-family: 'Courier New', monospace; }
+.btn-primary { background: #fff; color: #000; width: 100%; padding: 13px; font-size: 16px; font-weight: bold; }
+.btn-primary:hover { background: #ddd; }
+.btn-primary:disabled { background: #222; color: #444; cursor: not-allowed; }
+.btn-secondary { background: #111; color: #888; width: 100%; padding: 12px; font-size: 14px; border: 1px solid #2a2a2a; }
+.btn-secondary:hover { background: #1a1a1a; color: #ccc; }
+.btn-back-nav { background: transparent; color: #555; border: 1px solid #2a2a2a; padding: 6px 14px; font-size: 13px; }
+.btn-back-nav:hover { color: #fff; border-color: #666; }
 
-        .mode-page.hidden {
-            display: none;
-        }
+.mode-card { padding: 20px; background: #0d0d0d; border: 2px solid #1e1e1e; border-radius: 10px; text-align: left; width: 100%; }
+.mode-card:hover { border-color: #555; background: #141414; }
+.mode-card-title { font-size: 18px; font-weight: bold; margin-bottom: 6px; }
+.mode-card-desc { font-size: 12px; color: #555; line-height: 1.5; }
 
-        .mode-page h1 {
-            font-size: 24px;
-            text-align: center;
-            color: #aaa;
-            margin-bottom: 20px;
-        }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 13px; color: #666; }
+textarea { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; color: #fff; font-family: 'Courier New', monospace; font-size: 14px; resize: vertical; min-height: 100px; }
+textarea:focus { outline: none; border-color: #555; }
+.color-row { display: flex; align-items: center; gap: 12px; }
+input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-radius: 4px; background: #000; cursor: pointer; }
+.color-dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #2a2a2a; flex-shrink: 0; }
+.hint { font-size: 11px; color: #444; line-height: 1.6; }
 
-        .mode-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+.tabs { display: flex; gap: 6px; }
+.tab { flex: 1; padding: 10px 8px; font-size: 13px; background: #0a0a0a; border: 1px solid #1e1e1e; border-radius: 6px; color: #444; font-family: 'Courier New', monospace; }
+.tab.active-tab { background: #141414; border-color: #444; color: #ccc; }
+.tab-content { display: none; flex-direction: column; gap: 14px; }
+.tab-content.show { display: flex; }
 
-        .mode-btn {
-            padding: 20px;
-            background-color: #111;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
+.upload-zone { border: 2px dashed #1e1e1e; border-radius: 10px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all .25s; background: #050505; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: #555; background: #0e0e0e; }
+.upload-zone input { display: none; }
+.upload-icon { font-size: 34px; margin-bottom: 10px; }
+.upload-label { font-size: 14px; color: #555; }
+.upload-label span { color: #888; text-decoration: underline; }
+.file-chosen { font-size: 12px; color: #66ff88; margin-top: 8px; min-height: 16px; }
 
-        .mode-btn:hover {
-            border-color: #666;
-            background-color: #1a1a1a;
-        }
+.api-key-row { display: flex; gap: 8px; }
+.api-key-input { flex: 1; padding: 10px 12px; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; color: #fff; font-family: 'Courier New', monospace; font-size: 13px; }
+.api-key-input:focus { outline: none; border-color: #555; }
+.api-key-input::placeholder { color: #2a2a2a; }
+.btn-save-key { background: #111; color: #666; border: 1px solid #2a2a2a; border-radius: 6px; padding: 0 14px; font-size: 12px; font-family: 'Courier New', monospace; white-space: nowrap; }
+.btn-save-key:hover { color: #fff; border-color: #666; }
+.key-status { font-size: 11px; color: #444; }
+.key-status.ok { color: #66ff88; }
+.key-link { font-size: 11px; color: #333; }
+.key-link a { color: #555; }
 
-        .mode-btn-title {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
+.progress-wrap { width: 100%; background: #111; border-radius: 99px; height: 3px; overflow: hidden; }
+.progress-bar { height: 100%; background: #666; border-radius: 99px; transition: width .4s; }
+.progress-label { font-size: 11px; color: #444; margin-top: 5px; }
 
-        .mode-btn-desc {
-            font-size: 12px;
-            color: #888;
-        }
+.mic-area { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 24px; background: #050505; border: 1px solid #1a1a1a; border-radius: 12px; }
+.mic-btn { width: 72px; height: 72px; border-radius: 50%; background: #111; border: 2px solid #333; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+.mic-btn.recording { background: #1a0000; border-color: #ff4444; animation: ripple 1.2s ease-in-out infinite; }
+.mic-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+@keyframes ripple { 0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,.5)} 50%{box-shadow:0 0 0 14px rgba(255,68,68,0)} }
+.mic-status { font-size: 13px; color: #444; text-align: center; }
+.mic-status.active { color: #ff8888; }
+.mic-status.done { color: #66ff88; }
+.live-transcript { width: 100%; min-height: 50px; max-height: 80px; overflow-y: auto; padding: 10px; background: #020202; border: 1px solid #111; border-radius: 6px; font-size: 12px; color: #555; line-height: 1.5; white-space: pre-wrap; }
 
-        /* Input Page */
-        .input-page {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 500px;
-            width: 100%;
-        }
+.countdown { font-size: 88px; font-weight: bold; color: #222; line-height: 1; }
+.wait-label { font-size: 16px; color: #333; animation: pulse 1s ease-in-out infinite; }
+.processing-msg { font-size: 16px; color: #444; line-height: 2; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-        .input-page.hidden {
-            display: none;
-        }
+.output-text { font-size: 18px; line-height: 1.9; word-wrap: break-word; white-space: pre-wrap; flex: 1; }
+.cursor { display: inline-block; width: 2px; height: 1em; background: #fff; margin-left: 2px; animation: blink .7s step-end infinite; }
+@keyframes blink { 50%{background:transparent} }
 
-        .input-page h1 {
-            font-size: 24px;
-            text-align: center;
-            color: #aaa;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .form-group label {
-            font-size: 14px;
-            color: #888;
-        }
-
-        .color-picker-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .color-input {
-            width: 60px;
-            height: 45px;
-            border: 2px solid #444;
-            border-radius: 4px;
-            cursor: pointer;
-            background: #000;
-        }
-
-        .color-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            border: 2px solid #555;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 12px;
-            background-color: #111;
-            border: 2px solid #333;
-            border-radius: 4px;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #666;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: block;
-            padding: 12px;
-            background-color: #111;
-            border: 2px solid #333;
-            border-radius: 4px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .file-input-label:hover {
-            border-color: #666;
-            background-color: #1a1a1a;
-        }
-
-        .file-name {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .hint {
-            font-size: 12px;
-            color: #555;
-            line-height: 1.5;
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-run {
-            background-color: #fff;
-            color: #000;
-            width: 100%;
-        }
-
-        .btn-run:hover {
-            background-color: #ddd;
-        }
-
-        .btn-run:disabled {
-            background-color: #666;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .btn-back {
-            background-color: #444;
-            color: #fff;
-            width: 100%;
-        }
-
-        .btn-back:hover {
-            background-color: #555;
-        }
-
-        .btn-mode-back {
-            background-color: #333;
-            color: #fff;
-            width: 100%;
-        }
-
-        .btn-mode-back:hover {
-            background-color: #444;
-        }
-
-        /* Waiting Page */
-        .waiting-page {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-            min-height: 100vh;
-            text-align: center;
-        }
-
-        .waiting-page.active {
-            display: flex;
-        }
-
-        .waiting-text {
-            font-size: 18px;
-            color: #666;
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        .countdown {
-            font-size: 80px;
-            font-weight: bold;
-            color: #555;
-            line-height: 1;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        /* Output Page */
-        .output-page {
-            display: none;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 100%;
-            width: 100%;
-            min-height: 100vh;
-            justify-content: space-between;
-        }
-
-        .output-page.active {
-            display: flex;
-        }
-
-        .output-text {
-            font-size: 18px;
-            line-height: 1.8;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            flex: 1;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em;
-            background-color: #fff;
-            margin-left: 2px;
-            animation: blink 0.7s step-end infinite;
-        }
-
-        @keyframes blink {
-            50% { background-color: transparent; }
-        }
-
-        .cursor.hidden {
-            display: none;
-        }
-
-        .processing {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            animation: pulse 1s ease-in-out infinite;
-        }
-    </style>
+.alert-warn { padding: 10px 14px; border-radius: 6px; font-size: 12px; line-height: 1.6; background: #0f0900; border: 1px solid #2a1500; color: #ffaa55; display: none; }
+</style>
 </head>
 <body>
-    <!-- Mode Selection Page -->
-    <div class="mode-page" id="modePage">
-        <h1>เลือกโหมด</h1>
-        <div class="mode-buttons">
-            <button class="mode-btn" id="textModeBtn">
-                <div class="mode-btn-title">📝 โหมดข้อความ</div>
-                <div class="mode-btn-desc">พิมพ์ข้อความด้วยเอฟเฟกต์ Typewriter</div>
-            </button>
-            <button class="mode-btn" id="lyricsModeBtn">
-                <div class="mode-btn-title">🎵 โหมดเนื้อเพลง</div>
-                <div class="mode-btn-desc">อัปโหลดไฟล์เสียงเพื่อเจนเนื้อเพลง</div>
-            </button>
-        </div>
+
+<!-- MODE SELECT -->
+<div class="page active" id="modePage">
+  <h1 class="center">เลือกโหมด</h1>
+  <button class="mode-card" id="textModeBtn">
+    <div class="mode-card-title">📝 โหมดข้อความ</div>
+    <div class="mode-card-desc">พิมพ์ข้อความด้วยเอฟเฟกต์ Typewriter</div>
+  </button>
+  <button class="mode-card" id="lyricsModeBtn">
+    <div class="mode-card-title">🎵 โหมดเนื้อเพลง / เสียง</div>
+    <div class="mode-card-desc">อัพโหลดไฟล์เสียง หรืออัดไมค์สด → แปลงเป็นข้อความ → Typewriter</div>
+  </button>
+</div>
+
+<!-- TEXT MODE -->
+<div class="page" id="textPage">
+  <div class="page-header">
+    <h1>📝 โหมดข้อความ</h1>
+    <button class="btn-back-nav" id="textBack">← กลับ</button>
+  </div>
+  <div class="form-group">
+    <label>สีตัวอักษร</label>
+    <div class="color-row">
+      <input type="color" id="textColor" value="#FFFFFF">
+      <div class="color-dot" id="textColorDot" style="background:#FFFFFF"></div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>ข้อความ</label>
+    <textarea id="textInput" placeholder="พิมพ์ข้อความที่นี่..." rows="6"></textarea>
+    <div class="hint">💡 ใช้ [#FF0000]ข้อความ[/#] เพื่อเปลี่ยนสีบางส่วน &nbsp;|&nbsp; Ctrl+Enter เพื่อ Run</div>
+  </div>
+  <button class="btn-primary" id="runTextBtn">▶ เริ่มพิมพ์</button>
+</div>
+
+<!-- LYRICS MODE -->
+<div class="page" id="lyricsPage">
+  <div class="page-header">
+    <h1>🎵 โหมดเสียง</h1>
+    <button class="btn-back-nav" id="lyricsBack">← กลับ</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active-tab" id="tabUploadBtn" onclick="switchTab('upload')">📁 อัพโหลดไฟล์</button>
+    <button class="tab" id="tabMicBtn" onclick="switchTab('mic')">🎙️ อัดไมค์สด</button>
+  </div>
+
+  <!-- Upload Tab -->
+  <div class="tab-content show" id="tabUploadContent">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="audioFile" accept="audio/*,video/*">
+      <div class="upload-icon">🎵</div>
+      <div class="upload-label">ลาก/วางไฟล์ หรือ <span>คลิกเพื่อเลือก</span></div>
+      <div class="hint" style="margin-top:6px">.mp3 .wav .m4a .ogg .flac .mp4</div>
+      <div class="file-chosen" id="fileChosen"></div>
     </div>
 
-    <!-- Text Mode Input Page -->
-    <div class="input-page" id="textInputPage">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>📝 โหมดข้อความ</h1>
-            <button class="btn-mode-back" id="backToModeBtn1">← ย้อนกลับ</button>
-        </div>
-
-        <div class="form-group">
-            <label>เลือกสีเริ่มต้น:</label>
-            <div class="color-picker-container">
-                <input type="color" id="colorPicker" class="color-input" value="#FFFFFF">
-                <div id="colorPreview" class="color-preview" style="background-color: #FFFFFF;"></div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>ข้อความ:</label>
-            <textarea id="textInput" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
-            <div class="hint">💡 ใช้ [#FF0000]ข้อความ[/#] เพื่อเปลี่ยนสี (เช่น สีแดง)</div>
-        </div>
-
-        <button class="btn-run" id="runTextBtn">Run</button>
+    <div class="form-group">
+      <label>OpenAI API Key <span style="color:#2a2a2a">(ใช้สำหรับ Whisper)</span></label>
+      <div class="api-key-row">
+        <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-...">
+        <button class="btn-save-key" id="saveKeyBtn">บันทึก</button>
+      </div>
+      <div class="key-status" id="keyStatus">ยังไม่มี key</div>
+      <div class="key-link">ขอ key ฟรีได้ที่ <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></div>
     </div>
 
-    <!-- Lyrics Mode Input Page -->
-    <div class="input-page" id="lyricsInputPage">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>🎵 โหมดเนื้อเพลง</h1>
-            <button class="btn-mode-back" id="backToModeBtn2">← ย้อนกลับ</button>
-        </div>
-
-        <div class="form-group">
-            <label>อัปโหลดไฟล์เสียง:</label>
-            <div class="file-input-wrapper">
-                <input type="file" id="audioFile" accept="audio/*" />
-                <label for="audioFile" class="file-input-label">
-                    📁 คลิกเพื่อเลือกไฟล์เสียง (.mp3, .wav, .m4a)
-                </label>
-                <div class="file-name" id="fileName"></div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>เลือกสีเริ่มต้น:</label>
-            <div class="color-picker-container">
-                <input type="color" id="lyricsColorPicker" class="color-input" value="#FFFFFF">
-                <div id="lyricsColorPreview" class="color-preview" style="background-color: #FFFFFF;"></div>
-            </div>
-        </div>
-
-        <button class="btn-run" id="runLyricsBtn" disabled>🔄 เจนเนื้อเพลง</button>
-        <div class="hint">⏳ กรุณาอัปโหลดไฟล์เสียงก่อนกดปุ่ม</div>
+    <div id="progressWrap" style="display:none">
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <div class="progress-label" id="progressLabel">กำลังอัพโหลด...</div>
     </div>
 
-    <!-- Waiting Page -->
-    <div class="waiting-page" id="waitingPage">
-        <div class="waiting-text">กำลังเตรียมการ...</div>
-        <div class="countdown" id="countdown">10</div>
+    <button class="btn-primary" id="transcribeBtn" disabled>🔄 ถอดเสียงเป็นข้อความ</button>
+  </div>
+
+  <!-- Mic Tab -->
+  <div class="tab-content" id="tabMicContent">
+    <div class="mic-area">
+      <button class="mic-btn" id="micBtn">🎙️</button>
+      <div class="mic-status" id="micStatus">กดเพื่อเริ่มอัดเสียง</div>
+      <div class="live-transcript" id="liveTranscript">ข้อความจะปรากฏขณะพูด...</div>
     </div>
+    <div class="alert-warn" id="noSpeechAlert">⚠️ ไม่ได้ยินเสียง — ลองพูดดังขึ้น หรืออนุญาตไมค์ในเบราว์เซอร์</div>
+  </div>
 
-    <!-- Processing Page -->
-    <div class="waiting-page" id="processingPage">
-        <div class="processing">🎵 กำลังเจนเนื้อเพลง...<br>นี่อาจใช้เวลาสักครู่</div>
+  <!-- Result -->
+  <div class="form-group" id="transcriptBox" style="display:none">
+    <label>ข้อความที่ได้ <span style="color:#66ff88;font-size:11px">✓ แก้ไขได้</span></label>
+    <textarea id="transcriptResult" rows="5" style="color:#ccc" placeholder="ข้อความจะปรากฏที่นี่..."></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>สีตัวอักษร</label>
+    <div class="color-row">
+      <input type="color" id="lyricsColor" value="#FFFFFF">
+      <div class="color-dot" id="lyricsColorDot" style="background:#FFFFFF"></div>
     </div>
+  </div>
 
-    <!-- Output Page -->
-    <div class="output-page" id="outputPage">
-        <div class="output-text" id="outputText"></div>
-        <button class="btn-back" id="backBtn">← ย้อนกลับ</button>
-    </div>
+  <button class="btn-primary" id="runLyricsBtn" disabled>▶ เริ่ม Typewriter</button>
+</div>
 
-    <script>
-        // DOM Elements
-        const modePage = document.getElementById('modePage');
-        const textInputPage = document.getElementById('textInputPage');
-        const lyricsInputPage = document.getElementById('lyricsInputPage');
-        const waitingPage = document.getElementById('waitingPage');
-        const processingPage = document.getElementById('processingPage');
-        const outputPage = document.getElementById('outputPage');
+<!-- WAITING -->
+<div class="wait-center" id="waitingPage">
+  <div class="wait-label">กำลังเตรียม...</div>
+  <div class="countdown" id="countdown">5</div>
+</div>
 
-        const textModeBtn = document.getElementById('textModeBtn');
-        const lyricsModeBtn = document.getElementById('lyricsModeBtn');
-        const backToModeBtn1 = document.getElementById('backToModeBtn1');
-        const backToModeBtn2 = document.getElementById('backToModeBtn2');
+<!-- PROCESSING -->
+<div class="wait-center" id="processingPage">
+  <div class="processing-msg">🎵 กำลังถอดเสียง...<br><span style="font-size:13px;color:#2a2a2a">Whisper AI กำลังทำงาน</span></div>
+</div>
 
-        const colorPicker = document.getElementById('colorPicker');
-        const colorPreview = document.getElementById('colorPreview');
-        const textInput = document.getElementById('textInput');
-        const runTextBtn = document.getElementById('runTextBtn');
+<!-- OUTPUT -->
+<div class="full-page" id="outputPage">
+  <div class="output-text" id="outputText"></div>
+  <button class="btn-secondary" id="backBtn" style="margin-top:20px">← ย้อนกลับ</button>
+</div>
 
-        const audioFile = document.getElementById('audioFile');
-        const fileName = document.getElementById('fileName');
-        const lyricsColorPicker = document.getElementById('lyricsColorPicker');
-        const lyricsColorPreview = document.getElementById('lyricsColorPreview');
-        const runLyricsBtn = document.getElementById('runLyricsBtn');
+<script>
+// ── STATE ──────────────────────────────────
+let currentMode = 'text';
+let currentTab  = 'upload';
+let apiKey      = localStorage.getItem('oai_key') || '';
+let countdownTimer = null;
+let typewriterTimer = null;
+let transcribedText = '';
+let recognition = null;
+let isRecording = false;
+let micFinalText = '';
 
-        const backBtn = document.getElementById('backBtn');
-        const outputText = document.getElementById('outputText');
-        const countdownDisplay = document.getElementById('countdown');
+// ── PAGE SWITCHING ─────────────────────────
+function showPage(id) {
+  ['modePage','textPage','lyricsPage','outputPage'].forEach(p => {
+    document.getElementById(p).classList.remove('active');
+  });
+  ['waitingPage','processingPage'].forEach(p => {
+    document.getElementById(p).classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+}
 
-        // State
-        let countdownTimer = null;
-        let typewriterTimer = null;
-        let currentMode = null;
+// ── NAVIGATION ─────────────────────────────
+document.getElementById('textModeBtn').addEventListener('click', () => { currentMode='text'; showPage('textPage'); });
+document.getElementById('lyricsModeBtn').addEventListener('click', () => { currentMode='lyrics'; showPage('lyricsPage'); });
+document.getElementById('textBack').addEventListener('click', () => showPage('modePage'));
+document.getElementById('lyricsBack').addEventListener('click', () => { stopMic(); showPage('modePage'); });
+document.getElementById('backBtn').addEventListener('click', () => {
+  clearInterval(countdownTimer); clearTimeout(typewriterTimer); stopMic();
+  document.getElementById('outputText').innerHTML = '';
+  showPage(currentMode === 'text' ? 'textPage' : 'lyricsPage');
+});
 
-        // Mode Selection
-        textModeBtn.addEventListener('click', () => {
-            currentMode = 'text';
-            modePage.classList.add('hidden');
-            textInputPage.classList.remove('hidden');
-        });
+// ── COLOR PICKERS ──────────────────────────
+document.getElementById('textColor').addEventListener('input', e =>
+  document.getElementById('textColorDot').style.background = e.target.value);
+document.getElementById('lyricsColor').addEventListener('input', e =>
+  document.getElementById('lyricsColorDot').style.background = e.target.value);
 
-        lyricsModeBtn.addEventListener('click', () => {
-            currentMode = 'lyrics';
-            modePage.classList.add('hidden');
-            lyricsInputPage.classList.remove('hidden');
-        });
+// ── API KEY ────────────────────────────────
+function refreshKeyStatus() {
+  const el = document.getElementById('keyStatus');
+  if (apiKey && apiKey.startsWith('sk-')) {
+    el.textContent = '✓ มี key แล้ว (' + apiKey.slice(0,12) + '...)';
+    el.className = 'key-status ok';
+  } else {
+    el.textContent = 'ยังไม่มี key';
+    el.className = 'key-status';
+  }
+}
+refreshKeyStatus();
 
-        backToModeBtn1.addEventListener('click', () => {
-            textInputPage.classList.add('hidden');
-            modePage.classList.remove('hidden');
-        });
+document.getElementById('saveKeyBtn').addEventListener('click', () => {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (val) { apiKey = val; localStorage.setItem('oai_key', val); document.getElementById('apiKeyInput').value = ''; refreshKeyStatus(); }
+});
 
-        backToModeBtn2.addEventListener('click', () => {
-            lyricsInputPage.classList.add('hidden');
-            modePage.classList.remove('hidden');
-        });
+// ── TABS ────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabUploadBtn').classList.toggle('active-tab', tab==='upload');
+  document.getElementById('tabMicBtn').classList.toggle('active-tab', tab==='mic');
+  document.getElementById('tabUploadContent').classList.toggle('show', tab==='upload');
+  document.getElementById('tabMicContent').classList.toggle('show', tab==='mic');
+}
 
-        // Color pickers
-        colorPicker.addEventListener('change', (e) => {
-            colorPreview.style.backgroundColor = e.target.value;
-        });
+// ── FILE UPLOAD ────────────────────────────
+const uploadZone = document.getElementById('uploadZone');
+const audioFileEl = document.getElementById('audioFile');
 
-        lyricsColorPicker.addEventListener('change', (e) => {
-            lyricsColorPreview.style.backgroundColor = e.target.value;
-        });
+uploadZone.addEventListener('click', () => audioFileEl.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+audioFileEl.addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
 
-        // Audio file upload
-        audioFile.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                fileName.textContent = '✓ ' + e.target.files[0].name;
-                runLyricsBtn.disabled = false;
-            } else {
-                fileName.textContent = '';
-                runLyricsBtn.disabled = true;
-            }
-        });
+function setFile(f) {
+  audioFileEl._file = f;
+  document.getElementById('fileChosen').textContent = '✓ ' + f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)';
+  document.getElementById('transcribeBtn').disabled = false;
+}
 
-        // Parse colored text
-        function parseText(text, defaultColor) {
-            const segments = [];
-            const regex = /\[#([A-Fa-f0-9]{6})\](.*?)\[\/#\]/g;
-            let lastIndex = 0;
-            let match;
+// ── WHISPER TRANSCRIBE ─────────────────────
+document.getElementById('transcribeBtn').addEventListener('click', async () => {
+  const file = audioFileEl._file;
+  if (!file) return;
+  if (!apiKey || !apiKey.startsWith('sk-')) { alert('กรุณาใส่ OpenAI API Key ก่อน'); return; }
 
-            while ((match = regex.exec(text)) !== null) {
-                if (match.index > lastIndex) {
-                    segments.push({
-                        text: text.substring(lastIndex, match.index),
-                        color: defaultColor
-                    });
-                }
-                segments.push({
-                    text: match[2],
-                    color: '#' + match[1]
-                });
-                lastIndex = regex.lastIndex;
-            }
+  showPage('processingPage');
 
-            if (lastIndex < text.length) {
-                segments.push({
-                    text: text.substring(lastIndex),
-                    color: defaultColor
-                });
-            }
+  // Fake progress
+  let prog = 0;
+  document.getElementById('progressWrap').style.display = 'block';
+  const progInterval = setInterval(() => {
+    prog = Math.min(prog + Math.random() * 7, 88);
+    document.getElementById('progressBar').style.width = prog + '%';
+    document.getElementById('progressLabel').textContent =
+      prog < 30 ? 'กำลังอัพโหลด...' : prog < 65 ? 'Whisper กำลังประมวลผล...' : 'เกือบเสร็จแล้ว...';
+  }, 600);
 
-            return segments.length > 0 ? segments : [{ text, color: defaultColor }];
-        }
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('model', 'whisper-1');
+    formData.append('response_format', 'text');
 
-        // Show waiting page
-        function showWaiting() {
-            textInputPage.classList.add('hidden');
-            lyricsInputPage.classList.add('hidden');
-            waitingPage.classList.add('active');
-        }
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + apiKey },
+      body: formData
+    });
 
-        // Show processing page
-        function showProcessing() {
-            textInputPage.classList.add('hidden');
-            lyricsInputPage.classList.add('hidden');
-            processingPage.classList.add('active');
-        }
+    clearInterval(progInterval);
+    document.getElementById('progressBar').style.width = '100%';
 
-        // Show output page
-        function showOutput() {
-            waitingPage.classList.remove('active');
-            processingPage.classList.remove('active');
-            outputPage.classList.add('active');
-        }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'HTTP ' + res.status);
+    }
 
-        // Show input page
-        function showInput() {
-            outputPage.classList.remove('active');
-            if (currentMode === 'text') {
-                textInputPage.classList.remove('hidden');
-            } else if (currentMode === 'lyrics') {
-                lyricsInputPage.classList.remove('hidden');
-            }
-        }
+    const text = await res.text();
+    setTranscript(text.trim());
+    showPage('lyricsPage');
 
-        // Countdown
-        function startCountdown(callback) {
-            let count = 10;
-            countdownDisplay.textContent = count;
+  } catch(err) {
+    clearInterval(progInterval);
+    setTranscript('');
+    document.getElementById('transcriptResult').value = '';
+    document.getElementById('transcriptResult').placeholder = '❌ เกิดข้อผิดพลาด: ' + err.message;
+    document.getElementById('transcriptBox').style.display = 'flex';
+    document.getElementById('runLyricsBtn').disabled = true;
+    showPage('lyricsPage');
+  }
+});
 
-            countdownTimer = setInterval(() => {
-                count--;
-                countdownDisplay.textContent = count;
+function setTranscript(text) {
+  transcribedText = text;
+  document.getElementById('transcriptBox').style.display = 'flex';
+  document.getElementById('transcriptResult').value = text;
+  document.getElementById('runLyricsBtn').disabled = !text.trim();
+}
 
-                if (count === 0) {
-                    clearInterval(countdownTimer);
-                    callback();
-                }
-            }, 1000);
-        }
+document.getElementById('transcriptResult').addEventListener('input', e => {
+  transcribedText = e.target.value;
+  document.getElementById('runLyricsBtn').disabled = !transcribedText.trim();
+});
 
-        // Typewriter effect
-        function typewrite(segments, index = 0, charIndex = 0) {
-            if (index >= segments.length) {
-                const cursor = document.createElement('span');
-                cursor.className = 'cursor';
-                outputText.appendChild(cursor);
-                return;
-            }
+// ── WEB SPEECH API ─────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('micBtn');
+const micStatus = document.getElementById('micStatus');
+const liveTranscript = document.getElementById('liveTranscript');
 
-            const segment = segments[index];
-            let span = outputText.querySelector(`[data-index="${index}"]`);
+if (!SpeechRecognition) {
+  micBtn.disabled = true;
+  micStatus.textContent = '❌ เบราว์เซอร์ไม่รองรับ — ใช้ Chrome แทน';
+}
 
-            if (!span) {
-                span = document.createElement('span');
-                span.setAttribute('data-index', index);
-                span.style.color = segment.color;
-                outputText.appendChild(span);
-            }
+micBtn.addEventListener('click', () => {
+  document.getElementById('noSpeechAlert').style.display = 'none';
+  if (isRecording) {
+    stopMic();
+    if (micFinalText.trim()) {
+      micStatus.textContent = '✅ เสร็จแล้ว';
+      micStatus.className = 'mic-status done';
+      setTranscript(micFinalText.trim());
+    } else {
+      micStatus.textContent = 'ไม่พบเสียง — ลองอีกครั้ง';
+      micStatus.className = 'mic-status';
+    }
+    return;
+  }
+  if (!SpeechRecognition) return;
 
-            if (charIndex < segment.text.length) {
-                span.textContent += segment.text[charIndex];
-                typewriterTimer = setTimeout(() => {
-                    typewrite(segments, index, charIndex + 1);
-                }, 50);
-            } else {
-                typewrite(segments, index + 1, 0);
-            }
-        }
+  micFinalText = '';
+  liveTranscript.textContent = 'กำลังฟัง...';
+  isRecording = true;
+  micBtn.classList.add('recording');
+  micBtn.textContent = '⏹️';
+  micStatus.textContent = 'กำลังอัดอยู่... (กดอีกครั้งเพื่อหยุด)';
+  micStatus.className = 'mic-status active';
 
-        // Text Mode
-        runTextBtn.addEventListener('click', () => {
-            const text = textInput.value.trim();
-            if (!text) return;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'th-TH';
+  recognition.continuous = true;
+  recognition.interimResults = true;
 
-            const defaultColor = colorPicker.value;
-            const segments = parseText(text, defaultColor);
+  recognition.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) micFinalText += t + ' ';
+      else interim += t;
+    }
+    liveTranscript.textContent = (micFinalText + interim) || '...';
+  };
 
-            showWaiting();
-            startCountdown(() => {
-                outputText.innerHTML = '';
-                showOutput();
-                typewrite(segments);
-            });
-        });
+  recognition.onerror = e => {
+    if (e.error === 'no-speech') document.getElementById('noSpeechAlert').style.display = 'block';
+    else if (e.error === 'not-allowed') { micStatus.textContent = '❌ ไม่ได้รับอนุญาตไมค์'; stopMic(); }
+  };
 
-        // Lyrics Mode
-        runLyricsBtn.addEventListener('click', async () => {
-            const file = audioFile.files[0];
-            if (!file) return;
+  recognition.onend = () => { if (isRecording) { try { recognition.start(); } catch(e){} } };
+  try { recognition.start(); } catch(e) { micStatus.textContent = '❌ ' + e.message; stopMic(); }
+});
 
-            showProcessing();
+function stopMic() {
+  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+  isRecording = false;
+  micBtn.classList.remove('recording');
+  micBtn.textContent = '🎙️';
+}
 
-            try {
-                // Upload file and get transcription
-                const formData = new FormData();
-                formData.append('file', file);
+// ── RUN BUTTONS ────────────────────────────
+document.getElementById('runTextBtn').addEventListener('click', () => {
+  const text = document.getElementById('textInput').value.trim();
+  if (!text) return;
+  runTypewriter(text, document.getElementById('textColor').value);
+});
+document.getElementById('textInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) document.getElementById('runTextBtn').click();
+});
 
-                const response = await fetch('https://api.manus.im/transcribe', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Authorization': 'Bearer ' + (localStorage.getItem('manus_token') || '')
-                    }
-                });
+document.getElementById('runLyricsBtn').addEventListener('click', () => {
+  const text = (document.getElementById('transcriptResult').value || transcribedText).trim();
+  if (!text) return;
+  stopMic();
+  runTypewriter(text, document.getElementById('lyricsColor').value);
+});
 
-                if (!response.ok) {
-                    throw new Error('Failed to transcribe audio');
-                }
+// ── TYPEWRITER ─────────────────────────────
+function parseText(text, def) {
+  const segs = [], re = /\[#([A-Fa-f0-9]{6})\](.*?)\[\/#\]/gs;
+  let last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) segs.push({ text: text.substring(last, m.index), color: def });
+    segs.push({ text: m[2], color: '#' + m[1] });
+    last = re.lastIndex;
+  }
+  if (last < text.length) segs.push({ text: text.substring(last), color: def });
+  return segs.length ? segs : [{ text, color: def }];
+}
 
-                const data = await response.json();
-                const lyrics = data.text || 'ไม่สามารถเจนเนื้อเพลงได้';
+function runTypewriter(text, color) {
+  const segments = parseText(text, color);
+  showPage('waitingPage');
+  let count = 5;
+  document.getElementById('countdown').textContent = count;
+  countdownTimer = setInterval(() => {
+    count--;
+    document.getElementById('countdown').textContent = count;
+    if (count <= 0) {
+      clearInterval(countdownTimer);
+      document.getElementById('outputText').innerHTML = '';
+      showPage('outputPage');
+      typewrite(segments);
+    }
+  }, 1000);
+}
 
-                const defaultColor = lyricsColorPicker.value;
-                const segments = parseText(lyrics, defaultColor);
-
-                outputText.innerHTML = '';
-                showOutput();
-                typewrite(segments);
-
-            } catch (error) {
-                console.error('Error:', error);
-                outputText.innerHTML = '<span style="color: #ff6666;">❌ เกิดข้อผิดพลาด: ' + error.message + '</span>';
-                showOutput();
-            }
-        });
-
-        // Back button
-        backBtn.addEventListener('click', () => {
-            clearInterval(countdownTimer);
-            clearTimeout(typewriterTimer);
-            outputText.innerHTML = '';
-            showInput();
-        });
-
-        // Keyboard shortcut
-        textInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                runTextBtn.click();
-            }
-        });
-    </script>
+function typewrite(segs, idx = 0, ci = 0) {
+  const out = document.getElementById('outputText');
+  if (idx >= segs.length) {
+    const cur = document.createElement('span'); cur.className = 'cursor'; out.appendChild(cur); return;
+  }
+  let span = out.querySelector(`[data-s="${idx}"]`);
+  if (!span) { span = document.createElement('span'); span.setAttribute('data-s', idx); span.style.color = segs[idx].color; out.appendChild(span); }
+  if (ci < segs[idx].text.length) {
+    span.textContent += segs[idx].text[ci];
+    typewriterTimer = setTimeout(() => typewrite(segs, idx, ci + 1), 45);
+  } else {
+    typewrite(segs, idx + 1, 0);
+  }
+}
+</script>
 </body>
 </html>
