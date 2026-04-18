@@ -64,6 +64,12 @@
         .pulse {
             animation: pulse 1s ease-in-out infinite;
         }
+        .instruction-text {
+            font-size: 12px;
+            color: #555;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body class="h-screen flex items-center justify-center p-4">
@@ -74,7 +80,7 @@
         
         <!-- Color Picker -->
         <div class="mb-4">
-            <label class="block text-gray-400 mb-2">เลือกสีข้อความ:</label>
+            <label class="block text-gray-400 mb-2">เลือกสีข้อความเริ่มต้น:</label>
             <div class="color-picker-wrapper justify-center">
                 <input type="color" id="color-picker" class="color-input" value="#FFFFFF">
                 <div id="color-preview" class="color-preview" style="background-color: #FFFFFF;"></div>
@@ -82,10 +88,16 @@
         </div>
 
         <!-- Text Input -->
-        <textarea id="user-input" rows="4" class="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white mb-4" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
+        <textarea id="user-input" rows="5" class="w-full p-4 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white mb-2" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
+        
+        <!-- Instruction -->
+        <div class="instruction-text">
+            💡 ใช้ [#HEX_COLOR]ข้อความ[/#] เพื่อเปลี่ยนสีเฉพาะคำ<br>
+            เช่น: สวัสดี [#FF0000]โลก[/#] ทั่วไป
+        </div>
         
         <!-- Run Button -->
-        <button id="run-btn" class="px-8 py-2 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors">
+        <button id="run-btn" class="mt-4 px-8 py-2 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors">
             Run
         </button>
     </div>
@@ -94,14 +106,14 @@
     <div id="waiting-container" class="hidden w-full h-full flex items-center justify-center">
         <div class="waiting-container">
             <div class="waiting-text pulse">กำลังเตรียมการ...</div>
-            <div class="countdown" id="countdown">5</div>
+            <div class="countdown" id="countdown">10</div>
         </div>
     </div>
 
     <!-- Output Section (Hidden by default) -->
     <div id="output-container" class="hidden w-full max-w-4xl h-full flex flex-col items-start justify-start p-10 overflow-auto">
         <div class="flex-1 w-full">
-            <p id="output-text" class="text-3xl typewriter-text cursor-blink leading-relaxed"></p>
+            <div id="output-text" class="text-3xl leading-relaxed"></div>
         </div>
         <!-- Back Button -->
         <button id="back-btn" class="mt-8 px-6 py-2 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors">
@@ -121,16 +133,51 @@
         const outputText = document.getElementById('output-text');
         const countdownDisplay = document.getElementById('countdown');
         let countdownTimer = null;
+        let typewriterTimer = null;
 
         // Update color preview when color picker changes
         colorPicker.addEventListener('change', (e) => {
             colorPreview.style.backgroundColor = e.target.value;
         });
 
+        // Parse text with color tags and return array of {text, color} objects
+        function parseColoredText(text, defaultColor) {
+            const result = [];
+            const regex = /\[#([A-Fa-f0-9]{6})\](.*?)\[\/#\]/g;
+            let lastIndex = 0;
+            let match;
+
+            while ((match = regex.exec(text)) !== null) {
+                // Add text before the color tag
+                if (match.index > lastIndex) {
+                    result.push({
+                        text: text.substring(lastIndex, match.index),
+                        color: defaultColor
+                    });
+                }
+                // Add colored text
+                result.push({
+                    text: match[2],
+                    color: '#' + match[1]
+                });
+                lastIndex = regex.lastIndex;
+            }
+
+            // Add remaining text
+            if (lastIndex < text.length) {
+                result.push({
+                    text: text.substring(lastIndex),
+                    color: defaultColor
+                });
+            }
+
+            return result.length > 0 ? result : [{text: text, color: defaultColor}];
+        }
+
         // Run button - switch to waiting view and start countdown
         runBtn.addEventListener('click', () => {
             const text = userInput.value;
-            const color = colorPicker.value;
+            const defaultColor = colorPicker.value;
             
             if (!text.trim()) return;
 
@@ -139,7 +186,7 @@
             waitingContainer.classList.remove('hidden');
             
             // Start countdown
-            let countdown = 5;
+            let countdown = 10;
             countdownDisplay.textContent = countdown;
             
             countdownTimer = setInterval(() => {
@@ -153,37 +200,68 @@
                     waitingContainer.classList.add('hidden');
                     outputContainer.classList.remove('hidden');
                     
-                    // Set text color
-                    outputText.style.color = color;
-                    outputText.textContent = '';
+                    // Clear output
+                    outputText.innerHTML = '';
                     
-                    // Start typewriter effect
-                    typeWriter(text, 0);
+                    // Parse colored text
+                    const parsedText = parseColoredText(text, defaultColor);
+                    
+                    // Start typewriter effect with colors
+                    typeWriterWithColors(parsedText, 0, 0);
                 }
             }, 1000);
         });
+
+        // Typewriter effect with color support
+        function typeWriterWithColors(parsedText, segmentIndex, charIndex) {
+            if (segmentIndex >= parsedText.length) {
+                // Add cursor at the end
+                const cursor = document.createElement('span');
+                cursor.style.borderRight = '2px solid white';
+                cursor.style.animation = 'blink 0.7s step-end infinite';
+                cursor.style.paddingRight = '2px';
+                outputText.appendChild(cursor);
+                return;
+            }
+
+            const segment = parsedText[segmentIndex];
+            
+            // Create or get span for this segment
+            let span = outputText.querySelector(`[data-segment="${segmentIndex}"]`);
+            if (!span) {
+                span = document.createElement('span');
+                span.style.color = segment.color;
+                span.setAttribute('data-segment', segmentIndex);
+                outputText.appendChild(span);
+            }
+
+            if (charIndex < segment.text.length) {
+                span.textContent += segment.text.charAt(charIndex);
+                typewriterTimer = setTimeout(() => {
+                    typeWriterWithColors(parsedText, segmentIndex, charIndex + 1);
+                }, 50);
+            } else {
+                // Move to next segment
+                typeWriterWithColors(parsedText, segmentIndex + 1, 0);
+            }
+        }
 
         // Back button - return to input view
         backBtn.addEventListener('click', () => {
             outputContainer.classList.add('hidden');
             inputContainer.classList.remove('hidden');
-            outputText.textContent = '';
+            outputText.innerHTML = '';
             
-            // Clear any active countdown
+            // Clear any active timers
             if (countdownTimer) {
                 clearInterval(countdownTimer);
             }
+            if (typewriterTimer) {
+                clearTimeout(typewriterTimer);
+            }
         });
 
-        // Typewriter effect function
-        function typeWriter(text, i) {
-            if (i < text.length) {
-                outputText.textContent += text.charAt(i);
-                setTimeout(() => typeWriter(text, i + 1), 50); // Speed: 50ms per character
-            }
-        }
-
-        // Allow Enter key to trigger Run button
+        // Allow Ctrl+Enter key to trigger Run button
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) {
                 runBtn.click();
