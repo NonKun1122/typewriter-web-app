@@ -12,7 +12,6 @@ body {
   min-height: 100vh; display: flex;
   align-items: center; justify-content: center; padding: 20px;
 }
-
 .page { display: none; flex-direction: column; gap: 18px; max-width: 500px; width: 100%; }
 .page.active { display: flex; }
 .full-page { display: none; flex-direction: column; width: 100%; min-height: 100vh; }
@@ -79,10 +78,12 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 .key-guide a { color: #55cc77; }
 .key-guide .note { font-size: 10px; color: #2a5a3a; margin-top: 2px; }
 
-.progress-wrap { width: 100%; background: #111; border-radius: 99px; height: 3px; overflow: hidden; }
-.progress-bar { height: 100%; background: #44aa66; border-radius: 99px; transition: width .4s; }
+/* PROGRESS */
+.progress-wrap { width: 100%; background: #111; border-radius: 99px; height: 4px; overflow: hidden; }
+.progress-bar { height: 100%; background: #44aa66; border-radius: 99px; transition: width .5s; }
 .progress-label { font-size: 11px; color: #3a7a50; margin-top: 5px; }
 
+/* MIC */
 .mic-area { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 20px; background: #050505; border: 1px solid #1a1a1a; border-radius: 12px; }
 .mic-btn { width: 68px; height: 68px; border-radius: 50%; background: #111; border: 2px solid #333; font-size: 26px; display: flex; align-items: center; justify-content: center; }
 .mic-btn.recording { background: #1a0000; border-color: #ff4444; animation: ripple 1.2s ease-in-out infinite; }
@@ -93,49 +94,38 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 .mic-status.done { color: #66ff88; }
 .live-transcript { width: 100%; min-height: 50px; max-height: 80px; overflow-y: auto; padding: 10px; background: #020202; border: 1px solid #111; border-radius: 6px; font-size: 12px; color: #555; line-height: 1.5; white-space: pre-wrap; }
 
-/* COUNTDOWN */
-.countdown-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.countdown { font-size: 100px; font-weight: bold; color: #1a1a1a; line-height: 1; transition: color .3s; }
-.countdown.pulse { color: #333; }
+/* WAITING */
+.countdown { font-size: 100px; font-weight: bold; color: #1a1a1a; line-height: 1; }
 .wait-label { font-size: 15px; color: #333; }
-.song-name-wait { font-size: 13px; color: #2a5a3a; margin-top: -8px; }
-.processing-msg { font-size: 16px; color: #444; line-height: 2.2; animation: pulse 1.2s ease-in-out infinite; }
+.song-name-wait { font-size: 12px; color: #2a5a3a; }
+.processing-box { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.processing-msg { font-size: 15px; color: #444; line-height: 2; text-align: center; }
+.processing-step { font-size: 12px; color: #333; animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.proc-progress-wrap { width: 280px; background: #111; border-radius: 99px; height: 3px; overflow: hidden; }
+.proc-progress-bar { height: 100%; background: #44aa66; border-radius: 99px; transition: width .6s; }
 
 /* OUTPUT */
 .output-wrap { flex: 1; padding: 20px 20px 0; overflow-y: auto; }
-.output-text { font-size: 20px; line-height: 2; word-wrap: break-word; }
-
-/* word spans */
-.word { display: inline; }
-.word.visible { }
+.output-text { font-size: 20px; line-height: 2.2; word-wrap: break-word; }
 .word.hidden { visibility: hidden; }
-
-/* cursor blink */
 .cursor { display: inline-block; width: 2px; height: 1em; background: #fff; margin-left: 3px; vertical-align: middle; animation: blink .7s step-end infinite; }
 @keyframes blink { 50%{background:transparent} }
 
-/* AUDIO PLAYER BAR */
-.player-bar {
-  position: sticky; bottom: 0;
-  background: #080808; border-top: 1px solid #1a1a1a;
-  padding: 12px 20px; display: flex; flex-direction: column; gap: 8px;
-}
+/* PLAYER BAR */
+.player-bar { position: sticky; bottom: 0; background: #060606; border-top: 1px solid #1a1a1a; padding: 12px 20px; display: flex; flex-direction: column; gap: 8px; }
 .player-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.song-info { font-size: 12px; color: #444; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.song-info span { color: #666; }
-.time-display { font-size: 11px; color: #333; white-space: nowrap; }
-.seek-bar-wrap { width: 100%; background: #111; border-radius: 99px; height: 3px; overflow: hidden; cursor: pointer; }
-.seek-bar { height: 100%; background: #444; border-radius: 99px; transition: width .5s linear; }
+.song-info { font-size: 12px; color: #3a3a3a; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.time-display { font-size: 11px; color: #2a2a2a; white-space: nowrap; }
+.seek-bar-wrap { width: 100%; background: #111; border-radius: 99px; height: 4px; overflow: hidden; cursor: pointer; }
+.seek-bar { height: 100%; background: #333; border-radius: 99px; }
 .player-bottom { display: flex; gap: 8px; }
-.btn-back-small { background: transparent; color: #444; border: 1px solid #1e1e1e; padding: 7px 14px; font-size: 12px; flex: 1; }
+.btn-back-small { background: transparent; color: #444; border: 1px solid #1e1e1e; padding: 8px 14px; font-size: 12px; flex: 1; border-radius: 6px; }
 .btn-back-small:hover { color: #888; border-color: #333; }
-.btn-replay { background: #111; color: #666; border: 1px solid #1e1e1e; padding: 7px 14px; font-size: 12px; }
+.btn-replay { background: #111; color: #555; border: 1px solid #1e1e1e; padding: 8px 14px; font-size: 12px; border-radius: 6px; }
 .btn-replay:hover { color: #ccc; border-color: #444; }
 
 .alert-warn { padding: 10px 14px; border-radius: 6px; font-size: 12px; line-height: 1.6; background: #0f0900; border: 1px solid #2a1500; color: #ffaa55; display: none; }
-
-/* sync mode badge */
 .sync-badge { display: inline-block; background: #001a10; color: #44ff88; border: 1px solid #003322; border-radius: 4px; padding: 2px 8px; font-size: 10px; margin-left: 6px; }
 </style>
 </head>
@@ -150,7 +140,7 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
   </button>
   <button class="mode-card" id="lyricsModeBtn">
     <div class="mode-card-title">🎵 โหมดเนื้อเพลง / เสียง</div>
-    <div class="mode-card-desc">อัพโหลดเพลง → ข้อความขึ้นตรงจังหวะเพลง 🎶</div>
+    <div class="mode-card-desc">อัพโหลดเพลง → ข้อความขึ้นตรงจังหวะเพลงเลย 🎶</div>
   </button>
 </div>
 
@@ -199,24 +189,24 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 
     <div class="api-key-box">
       <div style="font-size:13px;color:#44aa66;font-weight:bold">
-        🤖 Groq API Key <span class="free-badge">ฟรี 100%</span>
+        🤖 AssemblyAI API Key <span class="free-badge">ฟรี 100%</span>
       </div>
       <div class="api-key-row">
-        <input type="password" class="api-key-input" id="apiKeyInput" placeholder="gsk_...">
+        <input type="password" class="api-key-input" id="apiKeyInput" placeholder="xxxxxxxxxxxxxxxxxx">
         <button class="btn-save-key" id="saveKeyBtn">บันทึก</button>
       </div>
       <div class="key-status" id="keyStatus">ยังไม่มี key</div>
     </div>
 
     <div class="key-guide">
-      <div class="key-guide-title">📋 วิธีขอ Groq Key ฟรี</div>
+      <div class="key-guide-title">📋 วิธีขอ AssemblyAI Key ฟรี</div>
       <ol>
-        <li>ไปที่ <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
-        <li>Sign Up → ใช้ Google ได้เลย</li>
-        <li>เมนู "API Keys" → "Create API Key"</li>
-        <li>Copy key มาวางช่องด้านบน</li>
+        <li>ไปที่ <a href="https://www.assemblyai.com" target="_blank">assemblyai.com</a></li>
+        <li>กด "Get a free API key" → สมัครด้วย Google</li>
+        <li>Copy API key จาก Dashboard</li>
+        <li>วางในช่องด้านบน กด "บันทึก"</li>
       </ol>
-      <div class="note">✓ Whisper Large V3 · ฟรี 28,800 วินาที/วัน · ได้ timestamp ระดับคำ</div>
+      <div class="note">✓ ฟรี · รองรับบราวเซอร์โดยตรง · Timestamp ระดับคำ · รองรับภาษาไทย</div>
     </div>
 
     <div id="progressWrap" style="display:none">
@@ -260,27 +250,30 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 
 <!-- WAITING -->
 <div class="wait-center" id="waitingPage">
-  <div class="countdown-wrap">
-    <div class="wait-label">เตรียมพร้อม...</div>
-    <div class="countdown" id="countdown">5</div>
-    <div class="song-name-wait" id="songNameWait"></div>
-  </div>
+  <div class="wait-label">เตรียมพร้อม...</div>
+  <div class="countdown" id="countdown">5</div>
+  <div class="song-name-wait" id="songNameWait"></div>
 </div>
 
 <!-- PROCESSING -->
 <div class="wait-center" id="processingPage">
-  <div class="processing-msg">⚡ Groq กำลังถอดเสียง...<br><span style="font-size:13px;color:#2a5a3a">จับ Timestamp ระดับคำ</span></div>
+  <div class="processing-box">
+    <div class="processing-msg">🎵 กำลังวิเคราะห์เสียง...</div>
+    <div class="proc-progress-wrap">
+      <div class="proc-progress-bar" id="procBar" style="width:0%"></div>
+    </div>
+    <div class="processing-step" id="procStep">กำลังอัพโหลดไฟล์...</div>
+  </div>
 </div>
 
-<!-- OUTPUT (Karaoke) -->
+<!-- OUTPUT -->
 <div class="full-page" id="outputPage">
   <div class="output-wrap">
     <div class="output-text" id="outputText"></div>
   </div>
-
-  <div class="player-bar" id="playerBar">
+  <div class="player-bar" id="playerBar" style="display:none">
     <div class="player-top">
-      <div class="song-info">🎵 <span id="songNameBar">เพลง</span></div>
+      <div class="song-info">🎵 <span id="songNameBar"></span></div>
       <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
     </div>
     <div class="seek-bar-wrap" id="seekBarWrap">
@@ -291,27 +284,32 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
       <button class="btn-replay" id="replayBtn">↺ เล่นใหม่</button>
     </div>
   </div>
-
-  <!-- Hidden audio element -->
+  <!-- text-mode back -->
+  <div id="textBackBar" style="display:none;padding:12px 20px;">
+    <button class="btn-secondary" id="backBtnText">← ย้อนกลับ</button>
+  </div>
   <audio id="audioPlayer" style="display:none"></audio>
 </div>
 
 <script>
-// ══ STATE ══════════════════════════════════
+// ══ STATE ══════════════════════════════════════════
 let currentMode = 'text';
-let apiKey = localStorage.getItem('groq_key') || '';
+let apiKey = localStorage.getItem('aai_key') || '';
 let countdownTimer = null;
 let syncTimers = [];
-let wordData = [];       // [{word, start, end}] from Whisper
-let audioBlob = null;    // original file blob
+let wordData = [];        // [{text, start(ms), end(ms)}]
+let audioBlob = null;
 let audioFileName = '';
 let transcribedText = '';
 let recognition = null;
 let isRecording = false;
 let micFinalText = '';
 let hasSyncData = false;
+let audioBlobUrl = null;
 
-// ══ PAGE SWITCH ════════════════════════════
+const ASMBL = 'https://api.assemblyai.com';
+
+// ══ PAGE SWITCH ════════════════════════════════════
 function showPage(id) {
   ['modePage','textPage','lyricsPage','outputPage'].forEach(p =>
     document.getElementById(p).classList.remove('active'));
@@ -320,25 +318,25 @@ function showPage(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// ══ NAV ═══════════════════════════════════
+// ══ NAVIGATION ════════════════════════════════════
 document.getElementById('textModeBtn').addEventListener('click', () => { currentMode='text'; showPage('textPage'); });
 document.getElementById('lyricsModeBtn').addEventListener('click', () => { currentMode='lyrics'; showPage('lyricsPage'); });
 document.getElementById('textBack').addEventListener('click', () => showPage('modePage'));
 document.getElementById('lyricsBack').addEventListener('click', () => { stopMic(); showPage('modePage'); });
 
-document.getElementById('backBtn').addEventListener('click', () => {
+function goBack() {
   cleanup();
   showPage(currentMode === 'text' ? 'textPage' : 'lyricsPage');
-});
+}
+document.getElementById('backBtn').addEventListener('click', goBack);
+document.getElementById('backBtnText').addEventListener('click', goBack);
 
 document.getElementById('replayBtn').addEventListener('click', () => {
   cleanup();
-  if (currentMode === 'lyrics' && hasSyncData) {
-    startKaraokeCountdown();
-  } else if (currentMode === 'lyrics') {
-    const text = document.getElementById('transcriptResult').value.trim();
-    const color = document.getElementById('lyricsColor').value;
-    startTextCountdown(text, color);
+  if (hasSyncData && audioBlob) startKaraokeCountdown();
+  else {
+    const text = document.getElementById('transcriptResult').value.trim() || transcribedText;
+    startTextCountdown(text, document.getElementById('lyricsColor').value);
   }
 });
 
@@ -349,22 +347,22 @@ function cleanup() {
   const audio = document.getElementById('audioPlayer');
   audio.pause();
   audio.src = '';
-  audio.removeEventListener('timeupdate', onTimeUpdate);
   document.getElementById('outputText').innerHTML = '';
   document.getElementById('seekBar').style.width = '0%';
+  document.getElementById('timeDisplay').textContent = '0:00 / 0:00';
 }
 
-// ══ COLOR ══════════════════════════════════
+// ══ COLOR ═════════════════════════════════════════
 document.getElementById('textColor').addEventListener('input', e =>
   document.getElementById('textColorDot').style.background = e.target.value);
 document.getElementById('lyricsColor').addEventListener('input', e =>
   document.getElementById('lyricsColorDot').style.background = e.target.value);
 
-// ══ API KEY ════════════════════════════════
+// ══ API KEY ════════════════════════════════════════
 function refreshKeyStatus() {
   const el = document.getElementById('keyStatus');
   if (apiKey) {
-    el.textContent = '✓ มี key แล้ว (' + apiKey.slice(0,14) + '...)';
+    el.textContent = '✓ มี key แล้ว (' + apiKey.slice(0,10) + '...)';
     el.className = 'key-status ok';
   } else {
     el.textContent = 'ยังไม่มี key';
@@ -372,18 +370,12 @@ function refreshKeyStatus() {
   }
 }
 refreshKeyStatus();
-
 document.getElementById('saveKeyBtn').addEventListener('click', () => {
   const val = document.getElementById('apiKeyInput').value.trim();
-  if (val) {
-    apiKey = val;
-    localStorage.setItem('groq_key', val);
-    document.getElementById('apiKeyInput').value = '';
-    refreshKeyStatus();
-  }
+  if (val) { apiKey = val; localStorage.setItem('aai_key', val); document.getElementById('apiKeyInput').value = ''; refreshKeyStatus(); }
 });
 
-// ══ TABS ═══════════════════════════════════
+// ══ TABS ══════════════════════════════════════════
 function switchTab(tab) {
   document.getElementById('tabUploadBtn').classList.toggle('active-tab', tab==='upload');
   document.getElementById('tabMicBtn').classList.toggle('active-tab', tab==='mic');
@@ -391,10 +383,9 @@ function switchTab(tab) {
   document.getElementById('tabMicContent').classList.toggle('show', tab==='mic');
 }
 
-// ══ FILE UPLOAD ════════════════════════════
+// ══ FILE UPLOAD ════════════════════════════════════
 const uploadZone = document.getElementById('uploadZone');
 const audioFileEl = document.getElementById('audioFile');
-
 uploadZone.addEventListener('click', () => audioFileEl.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
@@ -407,66 +398,91 @@ audioFileEl.addEventListener('change', e => { if (e.target.files[0]) setFile(e.t
 function setFile(f) {
   audioFileEl._file = f;
   audioBlob = f;
-  audioFileName = f.name.replace(/\.[^.]+$/, ''); // strip extension
+  audioFileName = f.name.replace(/\.[^.]+$/, '');
   document.getElementById('fileChosen').textContent = '✓ ' + f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)';
   document.getElementById('transcribeBtn').disabled = false;
 }
 
-// ══ GROQ WHISPER (with timestamps) ═════════
+// ══ ASSEMBLYAI TRANSCRIPTION ═══════════════════════
+function setProc(pct, msg) {
+  document.getElementById('procBar').style.width = pct + '%';
+  document.getElementById('procStep').textContent = msg;
+}
+
 document.getElementById('transcribeBtn').addEventListener('click', async () => {
   const file = audioFileEl._file;
   if (!file) return;
-  if (!apiKey) { alert('กรุณาใส่ Groq API Key ก่อน\n\nขอฟรีได้ที่ console.groq.com'); return; }
+  if (!apiKey) { alert('กรุณาใส่ AssemblyAI API Key ก่อน\n\nขอฟรีได้ที่ assemblyai.com'); return; }
 
   showPage('processingPage');
-  wordData = [];
-  hasSyncData = false;
-
-  let prog = 0;
+  wordData = []; hasSyncData = false;
   document.getElementById('progressWrap').style.display = 'block';
-  const progInterval = setInterval(() => {
-    prog = Math.min(prog + Math.random() * 10, 88);
-    document.getElementById('progressBar').style.width = prog + '%';
-    document.getElementById('progressLabel').textContent =
-      prog < 35 ? 'กำลังส่งไฟล์...' : prog < 70 ? 'Groq Whisper กำลังจับ timestamp...' : 'เกือบเสร็จแล้ว...';
-  }, 400);
 
   try {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('model', 'whisper-large-v3');
-    formData.append('response_format', 'verbose_json');
-    formData.append('timestamp_granularities[]', 'word');
-    // ไม่ lock language → auto detect ได้ทุกภาษา
-
-    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+    // Step 1: Upload audio file
+    setProc(10, 'กำลังอัพโหลดไฟล์...');
+    const uploadRes = await fetch(`${ASMBL}/v2/upload`, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + apiKey },
-      body: formData
+      headers: {
+        'authorization': apiKey,
+        'content-type': 'application/octet-stream',
+        'transfer-encoding': 'chunked'
+      },
+      body: file
     });
+    if (!uploadRes.ok) throw new Error('Upload failed: ' + uploadRes.status);
+    const { upload_url } = await uploadRes.json();
+    setProc(35, 'อัพโหลดสำเร็จ — กำลังส่งวิเคราะห์...');
 
-    clearInterval(progInterval);
-    document.getElementById('progressBar').style.width = '100%';
+    // Step 2: Request transcription with word-level timestamps
+    const transcriptRes = await fetch(`${ASMBL}/v2/transcript`, {
+      method: 'POST',
+      headers: {
+        'authorization': apiKey,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        audio_url: upload_url,
+        language_detection: true,
+        punctuate: true,
+        format_text: true
+      })
+    });
+    if (!transcriptRes.ok) throw new Error('Transcription request failed: ' + transcriptRes.status);
+    const { id } = await transcriptRes.json();
+    setProc(50, 'กำลังวิเคราะห์เสียง...');
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'HTTP ' + res.status);
+    // Step 3: Poll until complete
+    let result;
+    let pollCount = 0;
+    while (true) {
+      await new Promise(r => setTimeout(r, 2500));
+      pollCount++;
+      const pct = Math.min(50 + pollCount * 6, 90);
+      setProc(pct, 'กำลังถอดเสียง... (' + Math.round(pct) + '%)');
+
+      const pollRes = await fetch(`${ASMBL}/v2/transcript/${id}`, {
+        headers: { 'authorization': apiKey }
+      });
+      result = await pollRes.json();
+      if (result.status === 'completed' || result.status === 'error') break;
+      if (pollCount > 60) throw new Error('Timeout — ใช้เวลานานเกินไป');
     }
 
-    const data = await res.json();
+    setProc(100, 'เสร็จแล้ว!');
 
-    // Extract words with timestamps
-    if (data.words && data.words.length > 0) {
-      wordData = data.words; // [{word, start, end}]
+    if (result.status === 'error') throw new Error(result.error || 'Transcription error');
+
+    // result.words = [{text, start(ms), end(ms), confidence}]
+    if (result.words && result.words.length > 0) {
+      wordData = result.words;
       hasSyncData = true;
     }
 
-    const fullText = data.text || '';
-    setTranscript(fullText.trim(), hasSyncData);
+    setTranscript(result.text || '', hasSyncData);
     showPage('lyricsPage');
 
   } catch(err) {
-    clearInterval(progInterval);
     hasSyncData = false;
     setTranscript('', false);
     document.getElementById('transcriptResult').value = '';
@@ -484,57 +500,38 @@ function setTranscript(text, synced) {
   document.getElementById('syncBadge').style.display = synced ? 'inline-block' : 'none';
   document.getElementById('runLyricsBtn').disabled = !text.trim();
 }
-
 document.getElementById('transcriptResult').addEventListener('input', e => {
   transcribedText = e.target.value;
   document.getElementById('runLyricsBtn').disabled = !transcribedText.trim();
 });
 
-// ══ WEB SPEECH (MIC) ═══════════════════════
+// ══ WEB SPEECH (MIC) ══════════════════════════════
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
 const micStatus = document.getElementById('micStatus');
-
-if (!SpeechRecognition) {
-  micBtn.disabled = true;
-  micStatus.textContent = '❌ ใช้ Chrome แทน';
-}
+if (!SpeechRecognition) { micBtn.disabled = true; micStatus.textContent = '❌ ใช้ Chrome แทน'; }
 
 micBtn.addEventListener('click', () => {
   document.getElementById('noSpeechAlert').style.display = 'none';
   if (isRecording) {
     stopMic();
     if (micFinalText.trim()) {
-      micStatus.textContent = '✅ เสร็จแล้ว';
-      micStatus.className = 'mic-status done';
-      hasSyncData = false;
-      setTranscript(micFinalText.trim(), false);
-    } else {
-      micStatus.textContent = 'ไม่พบเสียง — ลองอีกครั้ง';
-      micStatus.className = 'mic-status';
-    }
+      micStatus.textContent = '✅ เสร็จแล้ว'; micStatus.className = 'mic-status done';
+      hasSyncData = false; setTranscript(micFinalText.trim(), false);
+    } else { micStatus.textContent = 'ไม่พบเสียง'; micStatus.className = 'mic-status'; }
     return;
   }
   if (!SpeechRecognition) return;
-  micFinalText = '';
-  document.getElementById('liveTranscript').textContent = 'กำลังฟัง...';
-  isRecording = true;
-  micBtn.classList.add('recording');
-  micBtn.textContent = '⏹️';
-  micStatus.textContent = 'กำลังอัดอยู่... (กดอีกครั้งเพื่อหยุด)';
-  micStatus.className = 'mic-status active';
-
+  micFinalText = ''; document.getElementById('liveTranscript').textContent = 'กำลังฟัง...';
+  isRecording = true; micBtn.classList.add('recording'); micBtn.textContent = '⏹️';
+  micStatus.textContent = 'กำลังอัดอยู่... (กดอีกครั้งเพื่อหยุด)'; micStatus.className = 'mic-status active';
   recognition = new SpeechRecognition();
-  recognition.lang = 'th-TH';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-
+  recognition.lang = 'th-TH'; recognition.continuous = true; recognition.interimResults = true;
   recognition.onresult = e => {
     let interim = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) micFinalText += t + ' ';
-      else interim += t;
+      if (e.results[i].isFinal) micFinalText += t + ' '; else interim += t;
     }
     document.getElementById('liveTranscript').textContent = (micFinalText + interim) || '...';
   };
@@ -545,25 +542,19 @@ micBtn.addEventListener('click', () => {
   recognition.onend = () => { if (isRecording) { try { recognition.start(); } catch(e){} } };
   try { recognition.start(); } catch(e) { micStatus.textContent = '❌ ' + e.message; stopMic(); }
 });
-
 function stopMic() {
   if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
-  isRecording = false;
-  micBtn.classList.remove('recording');
-  micBtn.textContent = '🎙️';
+  isRecording = false; micBtn.classList.remove('recording'); micBtn.textContent = '🎙️';
 }
 
-// ══ RUN BUTTONS ════════════════════════════
+// ══ RUN BUTTONS ════════════════════════════════════
 document.getElementById('runTextBtn').addEventListener('click', () => {
-  const text = document.getElementById('textInput').value.trim();
-  if (!text) return;
-  const color = document.getElementById('textColor').value;
-  startTextCountdown(text, color);
+  const text = document.getElementById('textInput').value.trim(); if (!text) return;
+  startTextCountdown(text, document.getElementById('textColor').value);
 });
 document.getElementById('textInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.ctrlKey) document.getElementById('runTextBtn').click();
 });
-
 document.getElementById('runLyricsBtn').addEventListener('click', () => {
   stopMic();
   if (hasSyncData && audioBlob) {
@@ -571,16 +562,13 @@ document.getElementById('runLyricsBtn').addEventListener('click', () => {
   } else {
     const text = (document.getElementById('transcriptResult').value || transcribedText).trim();
     if (!text) return;
-    const color = document.getElementById('lyricsColor').value;
-    startTextCountdown(text, color);
+    startTextCountdown(text, document.getElementById('lyricsColor').value);
   }
 });
 
-// ══ TEXT MODE COUNTDOWN ════════════════════
+// ══ TEXT COUNTDOWN ═════════════════════════════════
 function startTextCountdown(text, color) {
-  const segs = parseText(text, color);
   showPage('waitingPage');
-  document.getElementById('playerBar').style.display = 'none';
   document.getElementById('songNameWait').textContent = '';
   let count = 5;
   document.getElementById('countdown').textContent = count;
@@ -590,148 +578,137 @@ function startTextCountdown(text, color) {
     if (count <= 0) {
       clearInterval(countdownTimer);
       document.getElementById('outputText').innerHTML = '';
+      document.getElementById('playerBar').style.display = 'none';
+      document.getElementById('textBackBar').style.display = 'block';
       showPage('outputPage');
-      typewrite(segs);
+      typewrite(parseText(text, color));
     }
   }, 1000);
 }
 
-// ══ KARAOKE COUNTDOWN ══════════════════════
+// ══ KARAOKE COUNTDOWN ══════════════════════════════
 function startKaraokeCountdown() {
   showPage('waitingPage');
   document.getElementById('songNameWait').textContent = '🎵 ' + audioFileName;
   document.getElementById('songNameBar').textContent = audioFileName;
-
   let count = 5;
   document.getElementById('countdown').textContent = count;
-
   countdownTimer = setInterval(() => {
     count--;
     document.getElementById('countdown').textContent = count;
-    if (count <= 0) {
-      clearInterval(countdownTimer);
-      startKaraoke();
-    }
+    if (count <= 0) { clearInterval(countdownTimer); startKaraoke(); }
   }, 1000);
 }
 
-// ══ KARAOKE ENGINE ══════════════════════════
+// ══ KARAOKE ENGINE ═════════════════════════════════
 function startKaraoke() {
   const color = document.getElementById('lyricsColor').value;
   const out = document.getElementById('outputText');
   out.innerHTML = '';
 
   document.getElementById('playerBar').style.display = 'flex';
+  document.getElementById('textBackBar').style.display = 'none';
   showPage('outputPage');
 
-  // Setup audio
   const audio = document.getElementById('audioPlayer');
-  const blobUrl = URL.createObjectURL(audioBlob);
-  audio.src = blobUrl;
+  if (audioBlobUrl) URL.revokeObjectURL(audioBlobUrl);
+  audioBlobUrl = URL.createObjectURL(audioBlob);
+  audio.src = audioBlobUrl;
 
-  audio.addEventListener('loadedmetadata', () => {
-    const total = audio.duration;
-    document.getElementById('timeDisplay').textContent = '0:00 / ' + fmtTime(total);
-
-    // Build word spans (all hidden first)
-    wordData.forEach((w, i) => {
-      const span = document.createElement('span');
-      span.className = 'word hidden';
-      span.setAttribute('data-i', i);
-      span.style.color = color;
-      span.textContent = w.word + ' ';
-      out.appendChild(span);
-    });
-
-    // Schedule each word to appear at its timestamp
-    wordData.forEach((w, i) => {
-      const delay = Math.max(0, w.start * 1000);
-      const t = setTimeout(() => {
-        const span = out.querySelector(`[data-i="${i}"]`);
-        if (span) span.classList.remove('hidden');
-        // Scroll to keep latest word visible
-        out.parentElement.scrollTop = out.parentElement.scrollHeight;
-      }, delay);
-      syncTimers.push(t);
-    });
-
-    audio.play().catch(() => {});
+  // Build all word spans (hidden)
+  wordData.forEach((w, i) => {
+    const span = document.createElement('span');
+    span.className = 'word hidden';
+    span.setAttribute('data-i', i);
+    span.style.color = color;
+    // AssemblyAI uses space-separated words
+    span.textContent = w.text + ' ';
+    out.appendChild(span);
   });
 
-  // Seek bar update
-  function onTimeUpdate() {
-    const pct = audio.currentTime / audio.duration * 100;
+  audio.addEventListener('loadedmetadata', onAudioReady, { once: true });
+
+  function onAudioReady() {
+    document.getElementById('timeDisplay').textContent = '0:00 / ' + fmtTime(audio.duration);
+    scheduleWords(0);
+    audio.play().catch(() => {});
+  }
+
+  // Seek bar
+  audio.addEventListener('timeupdate', () => {
+    const pct = (audio.currentTime / audio.duration) * 100 || 0;
     document.getElementById('seekBar').style.width = pct + '%';
     document.getElementById('timeDisplay').textContent =
       fmtTime(audio.currentTime) + ' / ' + fmtTime(audio.duration);
-  }
-  audio.addEventListener('timeupdate', onTimeUpdate);
+  });
 
-  // Seek on tap
-  document.getElementById('seekBarWrap').addEventListener('click', e => {
+  document.getElementById('seekBarWrap').onclick = e => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pct = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = pct * audio.duration;
-    // Re-sync words: hide/show based on current time
-    const nowMs = audio.currentTime * 1000;
+    const newTime = pct * audio.duration;
+    audio.currentTime = newTime;
+    const nowMs = newTime * 1000;
+    // Show/hide words based on position
     out.querySelectorAll('.word').forEach((span, i) => {
-      const wStart = wordData[i] ? wordData[i].start * 1000 : 0;
+      const wStart = wordData[i] ? wordData[i].start : 0;
       span.classList.toggle('hidden', wStart > nowMs);
     });
-    syncTimers.forEach(t => clearTimeout(t));
-    syncTimers = [];
-    wordData.forEach((w, i) => {
-      const remaining = w.start * 1000 - nowMs;
-      if (remaining > 0) {
-        const t = setTimeout(() => {
-          const span = out.querySelector(`[data-i="${i}"]`);
-          if (span) { span.classList.remove('hidden'); out.parentElement.scrollTop = out.parentElement.scrollHeight; }
-        }, remaining);
-        syncTimers.push(t);
-      }
-    });
+    scheduleWords(nowMs);
+  };
+}
+
+function scheduleWords(fromMs) {
+  // Clear existing timers
+  syncTimers.forEach(t => clearTimeout(t));
+  syncTimers = [];
+  const out = document.getElementById('outputText');
+  wordData.forEach((w, i) => {
+    const delay = w.start - fromMs;  // AssemblyAI: start is already in ms
+    if (delay > 0) {
+      const t = setTimeout(() => {
+        const span = out.querySelector(`[data-i="${i}"]`);
+        if (span) {
+          span.classList.remove('hidden');
+          // Auto scroll
+          span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, delay);
+      syncTimers.push(t);
+    }
   });
 }
 
 function fmtTime(s) {
   if (!s || isNaN(s)) return '0:00';
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return m + ':' + String(sec).padStart(2, '0');
+  return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
 }
 
-// ══ TEXT TYPEWRITER ═════════════════════════
+// ══ TEXT TYPEWRITER ════════════════════════════════
 function parseText(text, def) {
   const segs = [], re = /\[#([A-Fa-f0-9]{6})\](.*?)\[\/#\]/gs;
   let last = 0, m;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) segs.push({ text: text.substring(last, m.index), color: def });
-    segs.push({ text: m[2], color: '#' + m[1] });
-    last = re.lastIndex;
+    segs.push({ text: m[2], color: '#' + m[1] }); last = re.lastIndex;
   }
   if (last < text.length) segs.push({ text: text.substring(last), color: def });
   return segs.length ? segs : [{ text, color: def }];
 }
 
-function typewrite(segs, idx = 0, ci = 0) {
+function typewrite(segs, idx=0, ci=0) {
   const out = document.getElementById('outputText');
   if (idx >= segs.length) {
     const cur = document.createElement('span'); cur.className = 'cursor'; out.appendChild(cur); return;
   }
   let span = out.querySelector(`[data-s="${idx}"]`);
   if (!span) {
-    span = document.createElement('span');
-    span.setAttribute('data-s', idx);
-    span.style.color = segs[idx].color;
-    out.appendChild(span);
+    span = document.createElement('span'); span.setAttribute('data-s',idx);
+    span.style.color = segs[idx].color; out.appendChild(span);
   }
   if (ci < segs[idx].text.length) {
     span.textContent += segs[idx].text[ci];
-    clearTimeout(window._tw);
-    window._tw = setTimeout(() => typewrite(segs, idx, ci + 1), 45);
-  } else {
-    typewrite(segs, idx + 1, 0);
-  }
+    window._tw = setTimeout(() => typewrite(segs, idx, ci+1), 45);
+  } else { typewrite(segs, idx+1, 0); }
 }
 </script>
 </body>
