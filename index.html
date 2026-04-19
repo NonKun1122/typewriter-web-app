@@ -26,7 +26,7 @@ h1.center { font-size: 24px; text-align: center; color: #aaa; }
 button { cursor: pointer; border: none; border-radius: 6px; transition: all .25s; font-family: 'Courier New', monospace; }
 .btn-primary { background: #fff; color: #000; width: 100%; padding: 13px; font-size: 16px; font-weight: bold; }
 .btn-primary:hover { background: #ddd; }
-.btn-primary:disabled { background: #222; color: #444; cursor: not-allowed; }
+.btn-primary:disabled { background: #1a1a1a; color: #333; cursor: not-allowed; }
 .btn-secondary { background: #111; color: #888; width: 100%; padding: 12px; font-size: 14px; border: 1px solid #2a2a2a; }
 .btn-secondary:hover { background: #1a1a1a; color: #ccc; }
 .btn-back-nav { background: transparent; color: #555; border: 1px solid #2a2a2a; padding: 6px 14px; font-size: 13px; }
@@ -46,6 +46,9 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 .color-dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #2a2a2a; flex-shrink: 0; }
 .hint { font-size: 11px; color: #444; line-height: 1.6; }
 
+/* FREE BADGE */
+.free-badge { display: inline-block; background: #003300; color: #44ff88; border: 1px solid #005500; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+
 .tabs { display: flex; gap: 6px; }
 .tab { flex: 1; padding: 10px 8px; font-size: 13px; background: #0a0a0a; border: 1px solid #1e1e1e; border-radius: 6px; color: #444; font-family: 'Courier New', monospace; }
 .tab.active-tab { background: #141414; border-color: #444; color: #ccc; }
@@ -60,20 +63,28 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 .upload-label span { color: #888; text-decoration: underline; }
 .file-chosen { font-size: 12px; color: #66ff88; margin-top: 8px; min-height: 16px; }
 
+/* API KEY SECTION */
+.api-key-box { background: #050505; border: 1px solid #1a1a1a; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 .api-key-row { display: flex; gap: 8px; }
-.api-key-input { flex: 1; padding: 10px 12px; background: #0a0a0a; border: 1px solid #222; border-radius: 6px; color: #fff; font-family: 'Courier New', monospace; font-size: 13px; }
+.api-key-input { flex: 1; padding: 10px 12px; background: #0d0d0d; border: 1px solid #222; border-radius: 6px; color: #fff; font-family: 'Courier New', monospace; font-size: 13px; }
 .api-key-input:focus { outline: none; border-color: #555; }
 .api-key-input::placeholder { color: #2a2a2a; }
 .btn-save-key { background: #111; color: #666; border: 1px solid #2a2a2a; border-radius: 6px; padding: 0 14px; font-size: 12px; font-family: 'Courier New', monospace; white-space: nowrap; }
 .btn-save-key:hover { color: #fff; border-color: #666; }
 .key-status { font-size: 11px; color: #444; }
 .key-status.ok { color: #66ff88; }
-.key-link { font-size: 11px; color: #333; }
-.key-link a { color: #555; }
+
+/* HOW TO GET KEY */
+.key-guide { background: #020802; border: 1px solid #0a1a0a; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.key-guide-title { font-size: 12px; color: #44aa66; font-weight: bold; }
+.key-guide ol { padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.key-guide li { font-size: 11px; color: #3a7a50; line-height: 1.5; }
+.key-guide a { color: #55cc77; }
+.key-guide .note { font-size: 10px; color: #2a5a3a; margin-top: 4px; }
 
 .progress-wrap { width: 100%; background: #111; border-radius: 99px; height: 3px; overflow: hidden; }
-.progress-bar { height: 100%; background: #666; border-radius: 99px; transition: width .4s; }
-.progress-label { font-size: 11px; color: #444; margin-top: 5px; }
+.progress-bar { height: 100%; background: #44aa66; border-radius: 99px; transition: width .4s; }
+.progress-label { font-size: 11px; color: #3a7a50; margin-top: 5px; }
 
 .mic-area { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 24px; background: #050505; border: 1px solid #1a1a1a; border-radius: 12px; }
 .mic-btn { width: 72px; height: 72px; border-radius: 50%; background: #111; border: 2px solid #333; font-size: 28px; display: flex; align-items: center; justify-content: center; }
@@ -147,6 +158,7 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 
   <!-- Upload Tab -->
   <div class="tab-content show" id="tabUploadContent">
+
     <div class="upload-zone" id="uploadZone">
       <input type="file" id="audioFile" accept="audio/*,video/*">
       <div class="upload-icon">🎵</div>
@@ -155,16 +167,31 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
       <div class="file-chosen" id="fileChosen"></div>
     </div>
 
-    <div class="form-group">
-      <label>OpenAI API Key <span style="color:#2a2a2a">(ใช้สำหรับ Whisper)</span></label>
+    <!-- Groq Key -->
+    <div class="api-key-box">
+      <div style="font-size:13px;color:#44aa66;font-weight:bold">
+        🤖 Groq API Key <span class="free-badge">ฟรี 100%</span>
+      </div>
       <div class="api-key-row">
-        <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-...">
+        <input type="password" class="api-key-input" id="apiKeyInput" placeholder="gsk_...">
         <button class="btn-save-key" id="saveKeyBtn">บันทึก</button>
       </div>
       <div class="key-status" id="keyStatus">ยังไม่มี key</div>
-      <div class="key-link">ขอ key ฟรีได้ที่ <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></div>
     </div>
 
+    <!-- How to get key -->
+    <div class="key-guide">
+      <div class="key-guide-title">📋 วิธีขอ Groq Key ฟรี (ไม่ต้องใส่บัตรเครดิต)</div>
+      <ol>
+        <li>ไปที่ <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
+        <li>กด Sign Up → สมัครด้วย Google ได้เลย</li>
+        <li>ไปที่เมนู "API Keys" → กด "Create API Key"</li>
+        <li>Copy key มาวางในช่องด้านบน</li>
+      </ol>
+      <div class="note">✓ ใช้ Whisper Large V3 · ฟรี 28,800 วินาที/วัน · ไม่มีวันหมดอายุ</div>
+    </div>
+
+    <!-- Progress -->
     <div id="progressWrap" style="display:none">
       <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
       <div class="progress-label" id="progressLabel">กำลังอัพโหลด...</div>
@@ -181,12 +208,13 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
       <div class="live-transcript" id="liveTranscript">ข้อความจะปรากฏขณะพูด...</div>
     </div>
     <div class="alert-warn" id="noSpeechAlert">⚠️ ไม่ได้ยินเสียง — ลองพูดดังขึ้น หรืออนุญาตไมค์ในเบราว์เซอร์</div>
+    <div class="hint">ใช้ Web Speech API ของเบราว์เซอร์ · ฟรี · ไม่ต้อง key · รองรับภาษาไทย</div>
   </div>
 
   <!-- Result -->
   <div class="form-group" id="transcriptBox" style="display:none">
     <label>ข้อความที่ได้ <span style="color:#66ff88;font-size:11px">✓ แก้ไขได้</span></label>
-    <textarea id="transcriptResult" rows="5" style="color:#ccc" placeholder="ข้อความจะปรากฏที่นี่..."></textarea>
+    <textarea id="transcriptResult" rows="5" style="color:#ccc"></textarea>
   </div>
 
   <div class="form-group">
@@ -208,7 +236,7 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 
 <!-- PROCESSING -->
 <div class="wait-center" id="processingPage">
-  <div class="processing-msg">🎵 กำลังถอดเสียง...<br><span style="font-size:13px;color:#2a2a2a">Whisper AI กำลังทำงาน</span></div>
+  <div class="processing-msg">⚡ Groq กำลังถอดเสียง...<br><span style="font-size:13px;color:#2a5a3a">Whisper Large V3 (เร็วมาก)</span></div>
 </div>
 
 <!-- OUTPUT -->
@@ -220,8 +248,7 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
 <script>
 // ── STATE ──────────────────────────────────
 let currentMode = 'text';
-let currentTab  = 'upload';
-let apiKey      = localStorage.getItem('oai_key') || '';
+let apiKey = localStorage.getItem('groq_key') || '';
 let countdownTimer = null;
 let typewriterTimer = null;
 let transcribedText = '';
@@ -229,18 +256,16 @@ let recognition = null;
 let isRecording = false;
 let micFinalText = '';
 
-// ── PAGE SWITCHING ─────────────────────────
+// ── PAGES ──────────────────────────────────
 function showPage(id) {
-  ['modePage','textPage','lyricsPage','outputPage'].forEach(p => {
-    document.getElementById(p).classList.remove('active');
-  });
-  ['waitingPage','processingPage'].forEach(p => {
-    document.getElementById(p).classList.remove('active');
-  });
+  ['modePage','textPage','lyricsPage','outputPage'].forEach(p =>
+    document.getElementById(p).classList.remove('active'));
+  ['waitingPage','processingPage'].forEach(p =>
+    document.getElementById(p).classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ── NAVIGATION ─────────────────────────────
+// ── NAV ────────────────────────────────────
 document.getElementById('textModeBtn').addEventListener('click', () => { currentMode='text'; showPage('textPage'); });
 document.getElementById('lyricsModeBtn').addEventListener('click', () => { currentMode='lyrics'; showPage('lyricsPage'); });
 document.getElementById('textBack').addEventListener('click', () => showPage('modePage'));
@@ -251,7 +276,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
   showPage(currentMode === 'text' ? 'textPage' : 'lyricsPage');
 });
 
-// ── COLOR PICKERS ──────────────────────────
+// ── COLOR ──────────────────────────────────
 document.getElementById('textColor').addEventListener('input', e =>
   document.getElementById('textColorDot').style.background = e.target.value);
 document.getElementById('lyricsColor').addEventListener('input', e =>
@@ -260,8 +285,11 @@ document.getElementById('lyricsColor').addEventListener('input', e =>
 // ── API KEY ────────────────────────────────
 function refreshKeyStatus() {
   const el = document.getElementById('keyStatus');
-  if (apiKey && apiKey.startsWith('sk-')) {
-    el.textContent = '✓ มี key แล้ว (' + apiKey.slice(0,12) + '...)';
+  if (apiKey && apiKey.startsWith('gsk_')) {
+    el.textContent = '✓ มี key แล้ว (' + apiKey.slice(0,14) + '...)';
+    el.className = 'key-status ok';
+  } else if (apiKey) {
+    el.textContent = '✓ มี key แล้ว';
     el.className = 'key-status ok';
   } else {
     el.textContent = 'ยังไม่มี key';
@@ -272,12 +300,16 @@ refreshKeyStatus();
 
 document.getElementById('saveKeyBtn').addEventListener('click', () => {
   const val = document.getElementById('apiKeyInput').value.trim();
-  if (val) { apiKey = val; localStorage.setItem('oai_key', val); document.getElementById('apiKeyInput').value = ''; refreshKeyStatus(); }
+  if (val) {
+    apiKey = val;
+    localStorage.setItem('groq_key', val);
+    document.getElementById('apiKeyInput').value = '';
+    refreshKeyStatus();
+  }
 });
 
 // ── TABS ────────────────────────────────────
 function switchTab(tab) {
-  currentTab = tab;
   document.getElementById('tabUploadBtn').classList.toggle('active-tab', tab==='upload');
   document.getElementById('tabMicBtn').classList.toggle('active-tab', tab==='mic');
   document.getElementById('tabUploadContent').classList.toggle('show', tab==='upload');
@@ -303,31 +335,31 @@ function setFile(f) {
   document.getElementById('transcribeBtn').disabled = false;
 }
 
-// ── WHISPER TRANSCRIBE ─────────────────────
+// ── GROQ WHISPER ───────────────────────────
 document.getElementById('transcribeBtn').addEventListener('click', async () => {
   const file = audioFileEl._file;
   if (!file) return;
-  if (!apiKey || !apiKey.startsWith('sk-')) { alert('กรุณาใส่ OpenAI API Key ก่อน'); return; }
+  if (!apiKey) { alert('กรุณาใส่ Groq API Key ก่อน\n\nขอฟรีได้ที่ console.groq.com'); return; }
 
   showPage('processingPage');
 
-  // Fake progress
   let prog = 0;
   document.getElementById('progressWrap').style.display = 'block';
   const progInterval = setInterval(() => {
-    prog = Math.min(prog + Math.random() * 7, 88);
+    prog = Math.min(prog + Math.random() * 12, 88);
     document.getElementById('progressBar').style.width = prog + '%';
     document.getElementById('progressLabel').textContent =
-      prog < 30 ? 'กำลังอัพโหลด...' : prog < 65 ? 'Whisper กำลังประมวลผล...' : 'เกือบเสร็จแล้ว...';
-  }, 600);
+      prog < 40 ? 'กำลังส่งไฟล์...' : prog < 75 ? 'Groq Whisper กำลังประมวลผล...' : 'เกือบเสร็จแล้ว...';
+  }, 400);
 
   try {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('model', 'whisper-1');
+    formData.append('model', 'whisper-large-v3');
     formData.append('response_format', 'text');
+    formData.append('language', 'th');  // ภาษาไทย (ลบออกถ้าต้องการ auto-detect)
 
-    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + apiKey },
       body: formData
@@ -368,7 +400,7 @@ document.getElementById('transcriptResult').addEventListener('input', e => {
   document.getElementById('runLyricsBtn').disabled = !transcribedText.trim();
 });
 
-// ── WEB SPEECH API ─────────────────────────
+// ── WEB SPEECH (MIC) ───────────────────────
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
 const micStatus = document.getElementById('micStatus');
@@ -434,7 +466,7 @@ function stopMic() {
   micBtn.textContent = '🎙️';
 }
 
-// ── RUN BUTTONS ────────────────────────────
+// ── RUN ────────────────────────────────────
 document.getElementById('runTextBtn').addEventListener('click', () => {
   const text = document.getElementById('textInput').value.trim();
   if (!text) return;
@@ -465,7 +497,7 @@ function parseText(text, def) {
 }
 
 function runTypewriter(text, color) {
-  const segments = parseText(text, color);
+  const segs = parseText(text, color);
   showPage('waitingPage');
   let count = 5;
   document.getElementById('countdown').textContent = count;
@@ -476,7 +508,7 @@ function runTypewriter(text, color) {
       clearInterval(countdownTimer);
       document.getElementById('outputText').innerHTML = '';
       showPage('outputPage');
-      typewrite(segments);
+      typewrite(segs);
     }
   }, 1000);
 }
@@ -487,7 +519,12 @@ function typewrite(segs, idx = 0, ci = 0) {
     const cur = document.createElement('span'); cur.className = 'cursor'; out.appendChild(cur); return;
   }
   let span = out.querySelector(`[data-s="${idx}"]`);
-  if (!span) { span = document.createElement('span'); span.setAttribute('data-s', idx); span.style.color = segs[idx].color; out.appendChild(span); }
+  if (!span) {
+    span = document.createElement('span');
+    span.setAttribute('data-s', idx);
+    span.style.color = segs[idx].color;
+    out.appendChild(span);
+  }
   if (ci < segs[idx].text.length) {
     span.textContent += segs[idx].text[ci];
     typewriterTimer = setTimeout(() => typewrite(segs, idx, ci + 1), 45);
