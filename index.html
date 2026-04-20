@@ -595,62 +595,74 @@ function startKaraoke() {
   blobUrl = URL.createObjectURL(audioBlob);
   audio.src = blobUrl;
 
-  // Build word spans — all hidden
-  wordData.forEach((w, i) => {
-    const span = document.createElement('span');
-    span.className = 'word hidden';
-    span.dataset.i = i;
-    span.style.color = color;
-    span.textContent = w.word + ' ';
-    out.appendChild(span);
-  });
-
-  // Cache spans array for fast lookup (avoid querySelectorAll every frame)
-  const spans = Array.from(out.querySelectorAll('.word'));
-  let lastShownIdx = -1;
-
   audio.onloadedmetadata = () => {
     document.getElementById('timeDisplay').textContent = '0:00 / ' + fmt(audio.duration);
-    audio.play().catch(() => {});
-  };
 
-  // ★ SYNC VIA REAL audio.currentTime — no setTimeout, no drift
-  audio.ontimeupdate = () => {
-    const ct = audio.currentTime;
+    // ── ถ้าไม่มี word timestamps → สร้าง fake timestamps กระจายตลอดเพลง ──
+    let words = wordData;
+    if (!words || words.length === 0) {
+      const rawText = (document.getElementById('transcriptResult').value || transcribedText).trim();
+      const tokens = rawText.split(/\s+/).filter(Boolean);
+      const dur = audio.duration || 180;
+      // กระจายคำเท่าๆ กัน ยกเว้น 2 วิแรก (intro)
+      const spacing = (dur - 2) / Math.max(tokens.length, 1);
+      words = tokens.map((w, i) => ({ word: w, start: 2 + i * spacing }));
+    }
 
-    // Seek bar + clock
-    document.getElementById('seekBar').style.width =
-      ((ct / audio.duration) * 100 || 0) + '%';
-    document.getElementById('timeDisplay').textContent =
-      fmt(ct) + ' / ' + fmt(audio.duration);
+    // Build word spans — all hidden
+    words.forEach((w, i) => {
+      const span = document.createElement('span');
+      span.className = 'word hidden';
+      span.dataset.i = i;
+      span.dataset.start = w.start;
+      span.style.color = color;
+      span.textContent = w.word + ' ';
+      out.appendChild(span);
+    });
 
-    // Show every word whose start time has passed
-    wordData.forEach((w, i) => {
-      if (ct >= w.start && spans[i] && spans[i].classList.contains('hidden')) {
-        spans[i].classList.remove('hidden');
-        if (i > lastShownIdx) {
-          lastShownIdx = i;
-          spans[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Cache for perf
+    const spans = Array.from(out.querySelectorAll('.word'));
+    let lastShownIdx = -1;
+
+    // ★ Sync via real audio.currentTime
+    audio.ontimeupdate = () => {
+      const ct = audio.currentTime;
+
+      document.getElementById('seekBar').style.width =
+        ((ct / audio.duration) * 100 || 0) + '%';
+      document.getElementById('timeDisplay').textContent =
+        fmt(ct) + ' / ' + fmt(audio.duration);
+
+      spans.forEach((span, i) => {
+        const wStart = parseFloat(span.dataset.start);
+        if (ct >= wStart && span.classList.contains('hidden')) {
+          span.classList.remove('hidden');
+          if (i > lastShownIdx) {
+            lastShownIdx = i;
+            span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
-      }
-    });
-  };
+      });
+    };
 
-  // Seek: tap progress bar
-  document.getElementById('seekBarWrap').onclick = e => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const newTime = (e.clientX - rect.left) / rect.width * audio.duration;
-    audio.currentTime = newTime;
-    lastShownIdx = -1;
-    wordData.forEach((w, i) => {
-      if (!spans[i]) return;
-      if (w.start <= newTime) {
-        spans[i].classList.remove('hidden');
-        lastShownIdx = i;
-      } else {
-        spans[i].classList.add('hidden');
-      }
-    });
+    // Seek bar tap
+    document.getElementById('seekBarWrap').onclick = e => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const newTime = (e.clientX - rect.left) / rect.width * audio.duration;
+      audio.currentTime = newTime;
+      lastShownIdx = -1;
+      spans.forEach(span => {
+        const wStart = parseFloat(span.dataset.start);
+        if (wStart <= newTime) {
+          span.classList.remove('hidden');
+          lastShownIdx = parseInt(span.dataset.i);
+        } else {
+          span.classList.add('hidden');
+        }
+      });
+    };
+
+    audio.play().catch(() => {});
   };
 }
 
