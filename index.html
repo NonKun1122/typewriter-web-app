@@ -172,12 +172,36 @@ input[type="color"] { width: 52px; height: 40px; border: 1px solid #333; border-
   </div>
 
   <div class="tabs">
-    <button class="tab active-tab" id="tabUploadBtn" onclick="switchTab('upload')">📁 อัพโหลดไฟล์</button>
-    <button class="tab" id="tabMicBtn" onclick="switchTab('mic')">🎙️ อัดไมค์สด</button>
+    <button class="tab active-tab" id="tabManualBtn" onclick="switchTab('manual')">📝 วางเนื้อเพลงเอง</button>
+    <button class="tab" id="tabUploadBtn" onclick="switchTab('upload')">🤖 ถอดอัตโนมัติ</button>
+    <button class="tab" id="tabMicBtn" onclick="switchTab('mic')">🎙️ ไมค์สด</button>
   </div>
 
-  <!-- Upload Tab -->
-  <div class="tab-content show" id="tabUploadContent">
+  <!-- Manual Lyrics Tab -->
+  <div class="tab-content show" id="tabManualContent">
+    <div class="upload-zone" id="uploadZoneManual">
+      <input type="file" id="audioFileManual" accept="audio/*,video/*">
+      <div class="upload-icon">🎵</div>
+      <div class="upload-label">อัพโหลดไฟล์เสียง <span>คลิกที่นี่</span></div>
+      <div class="hint" style="margin-top:6px">.mp3 .wav .m4a .ogg .flac</div>
+      <div class="file-chosen" id="fileChosenManual"></div>
+    </div>
+
+    <div class="form-group">
+      <label>วางเนื้อเพลงที่นี่ <span style="color:#444;font-size:10px">(Copy จาก Google ได้เลย)</span></label>
+      <textarea id="manualLyrics" rows="8" placeholder="วางเนื้อเพลงที่นี่...&#10;&#10;ตัวอย่าง:&#10;ไหตายเกอะ อยากให้เธอรู้&#10;ว่าฉันยังรักเธออยู่..."></textarea>
+    </div>
+
+    <div class="hint" style="background:#050505;border:1px solid #1a1a1a;border-radius:6px;padding:10px;color:#3a6a4a;">
+      ⚡ แอปจะกระจายเนื้อเพลงให้ตรงจังหวะอัตโนมัติ<br>
+      💡 ยิ่งแบ่งบรรทัดตรงจุดพักเพลงยิ่งแม่นยำขึ้น
+    </div>
+
+    <button class="btn-primary" id="runManualBtn" disabled>▶ เริ่ม Karaoke</button>
+  </div>
+
+  <!-- Upload Tab (Auto transcribe) -->
+  <div class="tab-content" id="tabUploadContent">
 
     <div class="upload-zone" id="uploadZone">
       <input type="file" id="audioFile" accept="audio/*,video/*">
@@ -340,6 +364,7 @@ function goBack() {
 }
 
 function cleanup() {
+  if (window._karaokeCleanup) { window._karaokeCleanup(); window._karaokeCleanup = null; }
   clearInterval(countdownTimer);
   syncTimers.forEach(t => clearTimeout(t)); syncTimers = [];
   const a = document.getElementById('audioPlayer');
@@ -369,10 +394,12 @@ document.getElementById('saveKeyBtn').onclick = () => {
 
 // ══ TABS ═══════════════════════════════════════
 function switchTab(t) {
-  document.getElementById('tabUploadBtn').classList.toggle('active-tab', t==='upload');
-  document.getElementById('tabMicBtn').classList.toggle('active-tab', t==='mic');
-  document.getElementById('tabUploadContent').classList.toggle('show', t==='upload');
-  document.getElementById('tabMicContent').classList.toggle('show', t==='mic');
+  ['manual','upload','mic'].forEach(id => {
+    document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1) + 'Btn')
+      .classList.toggle('active-tab', t === id);
+    document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1) + 'Content')
+      .classList.toggle('show', t === id);
+  });
 }
 
 // ══ FILE ═══════════════════════════════════════
@@ -529,6 +556,39 @@ function stopMic() {
   isRecording = false; micBtn.classList.remove('recording'); micBtn.textContent = '🎙️';
 }
 
+// ══ MANUAL LYRICS TAB ════════════════════════
+(function() {
+  const azm = document.getElementById('audioFileManual');
+  const uzm = document.getElementById('uploadZoneManual');
+  uzm.onclick = () => azm.click();
+  uzm.ondragover = e => { e.preventDefault(); uzm.classList.add('drag-over'); };
+  uzm.ondragleave = () => uzm.classList.remove('drag-over');
+  uzm.ondrop = e => { e.preventDefault(); uzm.classList.remove('drag-over'); if (e.dataTransfer.files[0]) setFileManual(e.dataTransfer.files[0]); };
+  azm.onchange = e => { if (e.target.files[0]) setFileManual(e.target.files[0]); };
+})();
+
+function setFileManual(f) {
+  audioBlob = f;
+  audioFileName = f.name.replace(/[.][^.]+$/, '');
+  document.getElementById('fileChosenManual').textContent =
+    '\u2713 ' + f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)';
+  checkManualReady();
+}
+document.getElementById('manualLyrics').oninput = checkManualReady;
+function checkManualReady() {
+  const ok = !!audioBlob && document.getElementById('manualLyrics').value.trim().length > 0;
+  document.getElementById('runManualBtn').disabled = !ok;
+}
+document.getElementById('runManualBtn').onclick = () => {
+  const text = document.getElementById('manualLyrics').value.trim();
+  if (!text || !audioBlob) return;
+  wordData = []; hasSyncData = false;
+  transcribedText = text;
+  document.getElementById('transcriptResult').value = text;
+  currentMode = 'lyrics';
+  startKaraokeCountdown();
+};
+
 // ══ RUN ════════════════════════════════════════
 document.getElementById('runTextBtn').onclick = () => {
   const t = document.getElementById('textInput').value.trim(); if (!t) return;
@@ -582,73 +642,142 @@ function startKaraokeCountdown() {
 
 // ══ KARAOKE ENGINE ═════════════════════════════
 function startKaraoke() {
-  const color = document.getElementById('lyricsColor').value;
-  const out = document.getElementById('outputText');
+  const color  = document.getElementById('lyricsColor').value;
+  const rawText = (document.getElementById('transcriptResult').value || transcribedText || '').trim();
+  const out    = document.getElementById('outputText');
   out.innerHTML = '';
 
   document.getElementById('playerBar').style.display = 'flex';
   document.getElementById('textBackBar').style.display = 'none';
   showPage('outputPage');
 
-  // Setup audio
+  // ── Setup audio ──────────────────────────────
   const audio = document.getElementById('audioPlayer');
+  audio.ontimeupdate = null;   // clear old handlers
   if (blobUrl) URL.revokeObjectURL(blobUrl);
   blobUrl = URL.createObjectURL(audioBlob);
-  audio.src = blobUrl;
 
-  // Build word spans — all hidden
-  wordData.forEach((w, i) => {
-    const span = document.createElement('span');
-    span.className = 'word hidden';
-    span.dataset.i = i;
-    span.style.color = color;
-    span.textContent = w.word + ' ';
-    out.appendChild(span);
-  });
+  // ── Decide word list ─────────────────────────
+  // wordData has real timestamps from Deepgram (seconds)
+  // If empty → will create fake ones after we know duration
+  let useRealTimestamps = (wordData && wordData.length > 0);
 
-  audio.onloadedmetadata = () => {
-    document.getElementById('timeDisplay').textContent = '0:00 / ' + fmt(audio.duration);
-    scheduleWords(0);
+  // ── If real timestamps: build spans now ──────
+  let spans = [];
+
+  function buildSpans(words) {
+    out.innerHTML = '';
+    spans = [];
+    words.forEach((w, i) => {
+      const sp = document.createElement('span');
+      sp.style.color   = color;
+      sp.style.opacity = '0';
+      sp.style.transition = 'opacity 0.15s';
+      sp.dataset.start = String(w.start);
+      sp.dataset.i     = String(i);
+      sp.textContent   = w.word + ' ';
+      out.appendChild(sp);
+      spans.push(sp);
+    });
+  }
+
+  if (useRealTimestamps) {
+    buildSpans(wordData);   // start(seconds) already known
+  }
+
+  // ── RAF sync loop ────────────────────────────
+  let rafId = null;
+  let lastIdx = -1;
+
+  function syncLoop() {
+    const ct = audio.currentTime;
+
+    // Seek bar
+    if (audio.duration && !isNaN(audio.duration)) {
+      document.getElementById('seekBar').style.width =
+        (ct / audio.duration * 100) + '%';
+      document.getElementById('timeDisplay').textContent =
+        fmt(ct) + ' / ' + fmt(audio.duration);
+    }
+
+    // Reveal words
+    for (let i = 0; i < spans.length; i++) {
+      const wStart = parseFloat(spans[i].dataset.start);
+      if (ct >= wStart && spans[i].style.opacity === '0') {
+        spans[i].style.opacity = '1';
+        if (i > lastIdx) {
+          lastIdx = i;
+          spans[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    rafId = requestAnimationFrame(syncLoop);
+  }
+
+  // ── When audio is ready ──────────────────────
+  function onReady() {
+    const dur = audio.duration;
+    document.getElementById('timeDisplay').textContent = '0:00 / ' + fmt(dur);
+
+    // Build fake timestamps if no real ones
+    if (!useRealTimestamps && rawText) {
+      // Split by lines first, then words — lines define timing groups
+      const lines = rawText.split(/\n/).map(l => l.trim()).filter(Boolean);
+      const intro  = Math.min(dur * 0.04, 2);
+      const usable = dur - intro - 1;
+      const lineGap = usable / Math.max(lines.length, 1);
+      const fakeWords = [];
+      lines.forEach((line, li) => {
+        const lineStart = intro + li * lineGap;
+        const words = line.split(/[ \t]+/).filter(Boolean);
+        const wordGap = lineGap * 0.85 / Math.max(words.length, 1);
+        words.forEach((w, wi) => {
+          fakeWords.push({ word: w, start: lineStart + wi * wordGap });
+        });
+      });
+      buildSpans(fakeWords);
+    }
+
     audio.play().catch(() => {});
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(syncLoop);
+  }
+
+  // Use multiple events for mobile compatibility
+  audio.onloadedmetadata = onReady;
+  audio.oncanplay = () => {
+    // Fallback if loadedmetadata already fired but onReady not called
+    if (spans.length === 0 && rawText) onReady();
   };
 
-  audio.ontimeupdate = () => {
-    const pct = (audio.currentTime / audio.duration * 100) || 0;
-    document.getElementById('seekBar').style.width = pct + '%';
-    document.getElementById('timeDisplay').textContent =
-      fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
-  };
+  audio.src = blobUrl;   // set src AFTER handlers
 
-  // Seek
+  // ── Seek bar tap ─────────────────────────────
   document.getElementById('seekBarWrap').onclick = e => {
+    if (!audio.duration) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const newTime = (e.clientX - rect.left) / rect.width * audio.duration;
     audio.currentTime = newTime;
-    // Immediately show words that should already be visible
-    out.querySelectorAll('.word').forEach((span, i) => {
-      span.classList.toggle('hidden', wordData[i].start > newTime);
+    lastIdx = -1;
+    spans.forEach(sp => {
+      if (parseFloat(sp.dataset.start) <= newTime) {
+        sp.style.opacity = '1';
+        lastIdx = parseInt(sp.dataset.i);
+      } else {
+        sp.style.opacity = '0';
+      }
     });
-    scheduleWords(newTime);
+  };
+
+  // Stop RAF when leaving
+  const origCleanup = window._karaokeCleanup;
+  window._karaokeCleanup = () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    if (origCleanup) origCleanup();
   };
 }
 
-function scheduleWords(fromSec) {
-  syncTimers.forEach(t => clearTimeout(t)); syncTimers = [];
-  const out = document.getElementById('outputText');
-  wordData.forEach((w, i) => {
-    const delayMs = (w.start - fromSec) * 1000;
-    if (delayMs > 0) {
-      const t = setTimeout(() => {
-        const span = out.querySelector(`[data-i="${i}"]`);
-        if (span) {
-          span.classList.remove('hidden');
-          span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, delayMs);
-      syncTimers.push(t);
-    }
-  });
-}
 
 function fmt(s) {
   if (!s || isNaN(s)) return '0:00';
