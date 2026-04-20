@@ -590,82 +590,65 @@ function startKaraoke() {
   document.getElementById('textBackBar').style.display = 'none';
   showPage('outputPage');
 
+  // Setup audio
   const audio = document.getElementById('audioPlayer');
   if (blobUrl) URL.revokeObjectURL(blobUrl);
   blobUrl = URL.createObjectURL(audioBlob);
   audio.src = blobUrl;
 
+  // Build word spans — all hidden
+  wordData.forEach((w, i) => {
+    const span = document.createElement('span');
+    span.className = 'word hidden';
+    span.dataset.i = i;
+    span.style.color = color;
+    span.textContent = w.word + ' ';
+    out.appendChild(span);
+  });
+
   audio.onloadedmetadata = () => {
     document.getElementById('timeDisplay').textContent = '0:00 / ' + fmt(audio.duration);
-
-    // ── ถ้าไม่มี word timestamps → สร้าง fake timestamps กระจายตลอดเพลง ──
-    let words = wordData;
-    if (!words || words.length === 0) {
-      const rawText = (document.getElementById('transcriptResult').value || transcribedText).trim();
-      const tokens = rawText.split(/\s+/).filter(Boolean);
-      const dur = audio.duration || 180;
-      // กระจายคำเท่าๆ กัน ยกเว้น 2 วิแรก (intro)
-      const spacing = (dur - 2) / Math.max(tokens.length, 1);
-      words = tokens.map((w, i) => ({ word: w, start: 2 + i * spacing }));
-    }
-
-    // Build word spans — all hidden
-    words.forEach((w, i) => {
-      const span = document.createElement('span');
-      span.className = 'word hidden';
-      span.dataset.i = i;
-      span.dataset.start = w.start;
-      span.style.color = color;
-      span.textContent = w.word + ' ';
-      out.appendChild(span);
-    });
-
-    // Cache for perf
-    const spans = Array.from(out.querySelectorAll('.word'));
-    let lastShownIdx = -1;
-
-    // ★ Sync via real audio.currentTime
-    audio.ontimeupdate = () => {
-      const ct = audio.currentTime;
-
-      document.getElementById('seekBar').style.width =
-        ((ct / audio.duration) * 100 || 0) + '%';
-      document.getElementById('timeDisplay').textContent =
-        fmt(ct) + ' / ' + fmt(audio.duration);
-
-      spans.forEach((span, i) => {
-        const wStart = parseFloat(span.dataset.start);
-        if (ct >= wStart && span.classList.contains('hidden')) {
-          span.classList.remove('hidden');
-          if (i > lastShownIdx) {
-            lastShownIdx = i;
-            span.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }
-      });
-    };
-
-    // Seek bar tap
-    document.getElementById('seekBarWrap').onclick = e => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const newTime = (e.clientX - rect.left) / rect.width * audio.duration;
-      audio.currentTime = newTime;
-      lastShownIdx = -1;
-      spans.forEach(span => {
-        const wStart = parseFloat(span.dataset.start);
-        if (wStart <= newTime) {
-          span.classList.remove('hidden');
-          lastShownIdx = parseInt(span.dataset.i);
-        } else {
-          span.classList.add('hidden');
-        }
-      });
-    };
-
+    scheduleWords(0);
     audio.play().catch(() => {});
+  };
+
+  audio.ontimeupdate = () => {
+    const pct = (audio.currentTime / audio.duration * 100) || 0;
+    document.getElementById('seekBar').style.width = pct + '%';
+    document.getElementById('timeDisplay').textContent =
+      fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+  };
+
+  // Seek
+  document.getElementById('seekBarWrap').onclick = e => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const newTime = (e.clientX - rect.left) / rect.width * audio.duration;
+    audio.currentTime = newTime;
+    // Immediately show words that should already be visible
+    out.querySelectorAll('.word').forEach((span, i) => {
+      span.classList.toggle('hidden', wordData[i].start > newTime);
+    });
+    scheduleWords(newTime);
   };
 }
 
+function scheduleWords(fromSec) {
+  syncTimers.forEach(t => clearTimeout(t)); syncTimers = [];
+  const out = document.getElementById('outputText');
+  wordData.forEach((w, i) => {
+    const delayMs = (w.start - fromSec) * 1000;
+    if (delayMs > 0) {
+      const t = setTimeout(() => {
+        const span = out.querySelector(`[data-i="${i}"]`);
+        if (span) {
+          span.classList.remove('hidden');
+          span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, delayMs);
+      syncTimers.push(t);
+    }
+  });
+}
 
 function fmt(s) {
   if (!s || isNaN(s)) return '0:00';
