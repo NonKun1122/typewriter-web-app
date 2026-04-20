@@ -590,7 +590,6 @@ function startKaraoke() {
   document.getElementById('textBackBar').style.display = 'none';
   showPage('outputPage');
 
-  // Setup audio
   const audio = document.getElementById('audioPlayer');
   if (blobUrl) URL.revokeObjectURL(blobUrl);
   blobUrl = URL.createObjectURL(audioBlob);
@@ -606,49 +605,55 @@ function startKaraoke() {
     out.appendChild(span);
   });
 
+  // Cache spans array for fast lookup (avoid querySelectorAll every frame)
+  const spans = Array.from(out.querySelectorAll('.word'));
+  let lastShownIdx = -1;
+
   audio.onloadedmetadata = () => {
     document.getElementById('timeDisplay').textContent = '0:00 / ' + fmt(audio.duration);
-    scheduleWords(0);
     audio.play().catch(() => {});
   };
 
+  // ★ SYNC VIA REAL audio.currentTime — no setTimeout, no drift
   audio.ontimeupdate = () => {
-    const pct = (audio.currentTime / audio.duration * 100) || 0;
-    document.getElementById('seekBar').style.width = pct + '%';
+    const ct = audio.currentTime;
+
+    // Seek bar + clock
+    document.getElementById('seekBar').style.width =
+      ((ct / audio.duration) * 100 || 0) + '%';
     document.getElementById('timeDisplay').textContent =
-      fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+      fmt(ct) + ' / ' + fmt(audio.duration);
+
+    // Show every word whose start time has passed
+    wordData.forEach((w, i) => {
+      if (ct >= w.start && spans[i] && spans[i].classList.contains('hidden')) {
+        spans[i].classList.remove('hidden');
+        if (i > lastShownIdx) {
+          lastShownIdx = i;
+          spans[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
   };
 
-  // Seek
+  // Seek: tap progress bar
   document.getElementById('seekBarWrap').onclick = e => {
     const rect = e.currentTarget.getBoundingClientRect();
     const newTime = (e.clientX - rect.left) / rect.width * audio.duration;
     audio.currentTime = newTime;
-    // Immediately show words that should already be visible
-    out.querySelectorAll('.word').forEach((span, i) => {
-      span.classList.toggle('hidden', wordData[i].start > newTime);
+    lastShownIdx = -1;
+    wordData.forEach((w, i) => {
+      if (!spans[i]) return;
+      if (w.start <= newTime) {
+        spans[i].classList.remove('hidden');
+        lastShownIdx = i;
+      } else {
+        spans[i].classList.add('hidden');
+      }
     });
-    scheduleWords(newTime);
   };
 }
 
-function scheduleWords(fromSec) {
-  syncTimers.forEach(t => clearTimeout(t)); syncTimers = [];
-  const out = document.getElementById('outputText');
-  wordData.forEach((w, i) => {
-    const delayMs = (w.start - fromSec) * 1000;
-    if (delayMs > 0) {
-      const t = setTimeout(() => {
-        const span = out.querySelector(`[data-i="${i}"]`);
-        if (span) {
-          span.classList.remove('hidden');
-          span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, delayMs);
-      syncTimers.push(t);
-    }
-  });
-}
 
 function fmt(s) {
   if (!s || isNaN(s)) return '0:00';
